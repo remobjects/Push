@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Library Name="PushProvider" UID="{EBA4557B-CD8A-4434-B34F-1954640CE0A0}" Version="3.0">
+<Services>
+<Service Name="ApplePushProviderService" UID="{96E2AB4D-5DE2-4D20-8F8D-843F5BEBA3A2}">
+<Interfaces>
+<Interface Name="Default" UID="{E066DCE2-1A6F-408B-8F14-873E53A1B824}">
+<Operations>
+<Operation Name="registerDevice" UID="{5D73E4D6-428D-4B06-BFE0-BBBA67058E2D}">
+<Parameters>
+<Parameter Name="deviceToken" DataType="Binary" Flag="In" >
+</Parameter>
+<Parameter Name="additionalInfo" DataType="Utf8String" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+<Operation Name="unregisterDevice" UID="{EC8FB3A1-FD84-4F83-A54F-0B0904DBDDC9}">
+<Parameters>
+<Parameter Name="deviceToken" DataType="Binary" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+</Operations>
+</Interface>
+</Interfaces>
+</Service>
+</Services>
+<Structs>
+</Structs>
+<Enums>
+</Enums>
+<Arrays>
+</Arrays>
+</Library>
