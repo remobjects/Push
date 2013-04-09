@@ -22,15 +22,19 @@ type
     fSslStream: SslStream;
     {$ENDIF}
     fTcpClient: System.Net.Sockets.TcpClient;
-    fCertificate: X509Certificate;
+    fMacCertificate, fiOSCertificate: X509Certificate2;
     method CreateStream;
     method FindCertificate(aName: String): X509Certificate2;
     method Log(aMessage: String);
+    method set_MacCertificateFile(value: String);
+    method set_iOSCertificateFile(value: String);
   protected
   public
-    constructor (aCertificate: X509Certificate);
-    constructor (aCertificateName: String);
     method Dispose;
+
+    // Filename for Certificate .p12
+    property MacCertificateFile: String write set_MacCertificateFile;
+    property iOSCertificateFile: String write set_iOSCertificateFile;
 
     method PushRawNotification(aDeviceToken: array of Byte; Json: String); // async;
     method PushMessageNotification(aDeviceToken: array of Byte; aMessage: String);
@@ -49,25 +53,13 @@ type
   
 implementation
 
-constructor APSConnect(aCertificateName: String);
-begin
-  fCertificate := FindCertificate(aCertificateName);
-  //CreateStream;
-end;
-
-constructor APSConnect(aCertificate: X509Certificate);
-begin
-  fCertificate := aCertificate;
-  //CreateStream;
-end;
-
 method APSConnect.CreateStream;
 require
-  assigned(fCertificate);
+  assigned(fiOSCertificate);
 begin
   fTcpClient := new System.Net.Sockets.TcpClient(ApsHost, ApsPort);
 {$IFDEF MONO}
-  fSslStream := new Mono.Security.Protocol.Tls.SslClientStream(fTcpClient.GetStream(), ApsHost, fCertificate); 
+  fSslStream := new Mono.Security.Protocol.Tls.SslClientStream(fTcpClient.GetStream(), ApsHost, fiOSCertificate); 
  // fSslStream.WriteTimeout := 120 000;
   fSslStream.PrivateKeyCertSelectionDelegate := method (certificate: X509Certificate; targetHost: String): AsymmetricAlgorithm; 
     begin
@@ -77,7 +69,7 @@ begin
     serverCertificate: X509Certificate; targetHost: String; 
     serverRequestedCertificates: X509CertificateCollection): X509Certificate; 
     begin
-      result := fCertificate;  
+      result := fiOSCertificate;  
     end;
   fSslStream.ServerCertValidationDelegate := method (certificate: X509Certificate; certificateErrors: array of Int32): Boolean; 
     begin
@@ -110,7 +102,7 @@ end;
 method APSConnect.PushRawNotification(aDeviceToken: array of Byte; Json: String);
 require
   aDeviceToken.Length = 32;
-  assigned(fCertificate);
+  assigned(fiOSCertificate);
   assigned(ApsHost);
   ApsPort > 0;
 begin 
@@ -214,10 +206,10 @@ end;
 
 method APSConnect.GetFeedback;
 require
-  assigned(fCertificate);
+  assigned(fiOSCertificate);
 begin
   var lTcpClient := new System.Net.Sockets.TcpClient(ApsFeedbackHost, ApsFeedbackPort);
-  using lSslStream := new Mono.Security.Protocol.Tls.SslClientStream(lTcpClient.GetStream(), ApsHost, fCertificate) do begin
+  using lSslStream := new Mono.Security.Protocol.Tls.SslClientStream(lTcpClient.GetStream(), ApsHost, fiOSCertificate) do begin
     
     lSslStream.PrivateKeyCertSelectionDelegate := method (certificate: X509Certificate; targetHost: String): AsymmetricAlgorithm; 
       begin
@@ -227,7 +219,7 @@ begin
       serverCertificate: X509Certificate; targetHost: String; 
       serverRequestedCertificates: X509CertificateCollection): X509Certificate; 
       begin
-        result := fCertificate;  
+        result := fiOSCertificate;  
       end;
     lSslStream.ServerCertValidationDelegate := method (certificate: X509Certificate; certificateErrors: array of Int32): Boolean; 
       begin
@@ -246,6 +238,20 @@ end;
 method APSConnect.Log(aMessage: String);
 begin
   File.AppendAllText(Path.ChangeExtension(typeOf(self).Assembly.Location, '.log'), DateTime.Now.ToString('yyyy-MM-dd HH:mm:ss')+' '+aMessage+#13#10);
+end;
+
+method APSConnect.set_MacCertificateFile(value: String);
+begin
+  var lData := Mono.Security.X509.PKCS12.LoadFromFile(value, nil);
+  fMacCertificate := new X509Certificate2(lData.Certificates[0].RawData);
+  fMacCertificate.PrivateKey := System.Security.Cryptography.AsymmetricAlgorithm(lData.Keys[0]);
+end;
+
+method APSConnect.set_iOSCertificateFile(value: String);
+begin
+  var lData := Mono.Security.X509.PKCS12.LoadFromFile(value, nil);
+  fiOSCertificate := new X509Certificate2(lData.Certificates[0].RawData);
+  fiOSCertificate.PrivateKey := System.Security.Cryptography.AsymmetricAlgorithm(lData.Keys[0]);
 end;
 
 end.

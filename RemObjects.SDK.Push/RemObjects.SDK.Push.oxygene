@@ -2,14 +2,14 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <ProductVersion>3.5</ProductVersion>
-    <RootNamespace>RemObjects.SDK.ApplePushProvider</RootNamespace>
+    <RootNamespace>RemObjects.SDK.Push</RootNamespace>
     <OutputType>Library</OutputType>
-    <AssemblyName>RemObjects.SDK.ApplePushProvider</AssemblyName>
+    <AssemblyName>RemObjects.SDK.Push</AssemblyName>
     <AllowGlobals>false</AllowGlobals>
     <AllowLegacyOutParams>false</AllowLegacyOutParams>
     <AllowLegacyCreate>false</AllowLegacyCreate>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Name>RemObjects.SDK.PushProvider</Name>
+    <Name>RemObjects.SDK.Push</Name>
     <ProjectGuid>{6EE56252-1979-48FA-8409-3DCED05426C3}</ProjectGuid>
     <Company />
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>

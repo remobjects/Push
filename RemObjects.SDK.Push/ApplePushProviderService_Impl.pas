@@ -71,11 +71,12 @@ begin
     end
     else begin
       Log('Push registration new for '+lStringToken);
-      var p := new PushDeviceInfo(Token := deviceToken, 
-                                  UserReference := iif(HasSession, Session['UserID']:ToString, nil),
-                                  ClientInfo := additionalInfo, 
-                                  ServerInfo := nil,
-                                  LastSeen := DateTime.Now);
+      var p := new ApplePushDeviceInfo(Token := deviceToken, 
+                                       SubType := 'iOS',
+                                       UserReference := iif(HasSession, Session['UserID']:ToString, nil),
+                                       ClientInfo := additionalInfo, 
+                                       ServerInfo := nil,
+                                       LastSeen := DateTime.Now);
       PushDeviceManager.Devices.Add(lStringToken, p);
       PushDeviceManager.Flush;
     end;
