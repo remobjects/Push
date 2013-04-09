@@ -33,7 +33,7 @@ constructor ApplePushProviderService;
 begin
   inherited constructor();
   self.InitializeComponent();
-  self.RequireSession := PushDeviceManager.RequireSession;
+  self.RequireSession := PushDeviceManager.Instance.RequireSession;
 end;
 
 method ApplePushProviderService.Log(aMessage: String);
@@ -60,14 +60,14 @@ begin
   try
     var lStringToken := PushDeviceManager.BinaryToString(deviceToken);
     Log('Push registration for '+lStringToken);
-    if PushDeviceManager.Devices.ContainsKey(lStringToken) then begin
+    if PushDeviceManager.Instance.Devices.ContainsKey(lStringToken) then begin
       Log('Push registration updated for '+lStringToken);
 
-      var p := PushDeviceManager.Devices[lStringToken];
+      var p := PushDeviceManager.Instance.Devices[lStringToken];
       p.ClientInfo := additionalInfo;
       p.LastSeen := DateTime.Now;
-      PushDeviceManager.Flush;
-      PushDeviceManager.DeviceRegistered(nil, new DeviceEventArgs(DeviceToken := lStringToken));
+      PushDeviceManager.Instance.Flush;
+      PushDeviceManager.Instance.DeviceRegistered(nil, new DeviceEventArgs(DeviceToken := lStringToken));
     end
     else begin
       Log('Push registration new for '+lStringToken);
@@ -77,8 +77,8 @@ begin
                                        ClientInfo := additionalInfo, 
                                        ServerInfo := nil,
                                        LastSeen := DateTime.Now);
-      PushDeviceManager.Devices.Add(lStringToken, p);
-      PushDeviceManager.Flush;
+      PushDeviceManager.Instance.Devices.Add(lStringToken, p);
+      PushDeviceManager.Instance.Flush;
     end;
   except
     on E:Exception do begin
@@ -91,9 +91,9 @@ end;
 method ApplePushProviderService.unregisterDevice(deviceToken: RemObjects.SDK.Types.Binary);
 begin
   var lStringToken := PushDeviceManager.BinaryToString(deviceToken);
-  PushDeviceManager.Devices.Remove(lStringToken);
-  PushDeviceManager.Flush;
-  PushDeviceManager.DeviceUnregistered(nil, new DeviceEventArgs(DeviceToken := lStringToken));
+  PushDeviceManager.Instance.Devices.Remove(lStringToken);
+  PushDeviceManager.Instance.Flush;
+  PushDeviceManager.Instance.DeviceUnregistered(nil, new DeviceEventArgs(DeviceToken := lStringToken));
 end;
 
 end.

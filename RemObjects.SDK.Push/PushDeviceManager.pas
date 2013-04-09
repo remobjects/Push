@@ -56,20 +56,24 @@ type
     property OSVersion: String;
   end;
 
-  PushDeviceManager = public static class
+  PushDeviceManager = public class
   private
     fDevices: Dictionary<String, PushDeviceInfo>;
     fFilename: String;
-    //fAPSConnect: APSConnect;
+    class var fInstance: PushDeviceManager;
+    
     method set_Filename(value: String);
-
+    class method get_Instance: PushDeviceManager;
     method Load;
     method Save;
-    constructor;
   assembly
   public
+    constructor; empty;
+    constructor (aDeviceStoreFile: String);
+
+    class property Instance: PushDeviceManager read get_Instance;
+
     property Devices: Dictionary<String, PushDeviceInfo> read fDevices;
-    //property APSConnect: APSConnect read fAPSConnect;
 
     // Filename for Device Store XML
     property DeviceStoreFile: String read fFilename write set_Filename;
@@ -82,8 +86,8 @@ type
     method PushAudioNotificationToAllDevices(aSound: String);
     method PushCombinedNotificationToAllDevices(aMessage: String; aBadge: nullable Int32; aSound: String);}
 
-    method StringToBinary(aString: String): Binary;
-    method BinaryToString(aBinary: Binary): String;
+    class method StringToBinary(aString: String): Binary;
+    class method BinaryToString(aBinary: Binary): String;
 
     method Flush;
 
@@ -100,9 +104,9 @@ type
 
 implementation
 
-constructor PushDeviceManager;
+constructor PushDeviceManager(aDeviceStoreFile: String);
 begin
-  Load;
+  DeviceStoreFile := aDeviceStoreFile;
 end;
 
 method PushDeviceManager.set_Filename(value: String);
@@ -123,7 +127,7 @@ begin
   Save;
 end;
 
-method PushDeviceManager.BinaryToString(aBinary: Binary):String;
+class method PushDeviceManager.BinaryToString(aBinary: Binary):String;
 begin
   var sb := new StringBuilder;
   for i: Int32 := 0 to 31 do begin
@@ -133,7 +137,7 @@ begin
   result := sb.ToString;
 end;
 
-method PushDeviceManager.StringToBinary(aString: String):Binary;
+class method PushDeviceManager.StringToBinary(aString: String):Binary;
 begin
   var aArray := new Byte[32];
   for i: Int32 := 0 to 31 do begin
@@ -232,6 +236,12 @@ begin
       //if assigned(fAPSConnect) then fAPSConnect.PushMessageNotification(lToken.ToArray, 'Welcome back. Server has been Started.');
     end;
   end;
+end;
+
+class method PushDeviceManager.get_Instance: PushDeviceManager;
+begin
+  if not assigned(fInstance) then fInstance := new PushDeviceManager;
+  result := fInstance;
 end;
 
 
