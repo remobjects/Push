@@ -1,4 +1,4 @@
-namespace RemObjects.SDK.ApplePushProvider;
+namespace RemObjects.SDK.Push;
 
 interface
 
@@ -67,7 +67,7 @@ begin
       p.ClientInfo := additionalInfo;
       p.LastSeen := DateTime.Now;
       PushDeviceManager.Instance.Flush;
-      PushDeviceManager.Instance.DeviceRegistered(nil, new DeviceEventArgs(DeviceToken := lStringToken));
+      PushDeviceManager.Instance.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Registered));
     end
     else begin
       Log('Push registration new for '+lStringToken);
@@ -93,7 +93,7 @@ begin
   var lStringToken := PushDeviceManager.BinaryToString(deviceToken);
   PushDeviceManager.Instance.Devices.Remove(lStringToken);
   PushDeviceManager.Instance.Flush;
-  PushDeviceManager.Instance.DeviceUnregistered(nil, new DeviceEventArgs(DeviceToken := lStringToken));
+  PushDeviceManager.Instance.DeviceUnregistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Unregistered));
 end;
 
 end.

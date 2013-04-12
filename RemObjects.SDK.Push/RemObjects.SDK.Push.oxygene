@@ -93,6 +93,9 @@
     </Reference>
     <Reference Include="mscorlib">
     </Reference>
+    <Reference Include="RemObjects.InternetPack">
+      <HintPath>C:\Program Files (x86)\RemObjects Software\RemObjects SDK for .NET\Bin\RemObjects.InternetPack.dll</HintPath>
+    </Reference>
     <Reference Include="RemObjects.SDK">
       <Private>True</Private>
       <Package>/Users/mh/Code/RemObjects Data Abstract for Mono - 6.0.46.822/RemObjects.SDK.dll</Package>
@@ -125,10 +128,16 @@
   <ItemGroup>
     <Compile Include="ApplePushProviderService_Impl.pas">
       <Subtype>Component</Subtype>
-      <DesignableClassName>RemObjects.SDK.ApplePushProvider.ApplePushProviderService</DesignableClassName>
+      <DesignableClassName>RemObjects.SDK.Push.ApplePushProviderService</DesignableClassName>
       <DisableDesigner>True</DisableDesigner>
     </Compile>
     <Compile Include="APSConnect.pas" />
+    <Compile Include="GCMConnect.pas" />
+    <Compile Include="GooglePushProviderService_Impl.pas">
+      <SubType>Component</SubType>
+      <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
+      <DisableDesigner>True</DisableDesigner>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.pas" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

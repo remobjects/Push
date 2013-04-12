@@ -1,4 +1,4 @@
-﻿namespace RemObjects.SDK.ApplePushProvider;
+﻿namespace RemObjects.SDK.Push;
 
 interface
 
@@ -34,7 +34,7 @@ type
     property SubType: String;
   end;
 
-  AndroidPushDeviceInfo = public class(PushDeviceInfo)
+  GooglePushDeviceInfo = public class(PushDeviceInfo)
   public
     property &Type: String read 'GCM'; override;
     property ID: String read RegistrationID; override;
@@ -58,7 +58,7 @@ type
 
   PushDeviceManager = public class
   private
-    fDevices: Dictionary<String, PushDeviceInfo>;
+    fDevices: Dictionary<String, PushDeviceInfo> := new Dictionary<String,PushDeviceInfo>();
     fFilename: String;
     class var fInstance: PushDeviceManager;
     
@@ -100,7 +100,9 @@ type
   DeviceEventArgs = public class(EventArgs)
   public
     property DeviceToken: String;
-  end;  
+    property Mode: EventMode;
+  end;
+  EventMode nested in DeviceEventArgs = public enum (Registered, Unregistered, EntryUpdated);
 
 implementation
 
@@ -162,8 +164,8 @@ begin
           lDeviceNode.Add(new XAttribute('Token', BinaryToString(ApplePushDeviceInfo(lInfo).Token)));
           lDeviceNode.Add(new XAttribute('SubType', ApplePushDeviceInfo(lInfo).SubType));
         end;
-      AndroidPushDeviceInfo: begin
-          lDeviceNode.Add(new XAttribute('RegistrationID', AndroidPushDeviceInfo(lInfo).RegistrationID));
+      GooglePushDeviceInfo: begin
+          lDeviceNode.Add(new XAttribute('RegistrationID', GooglePushDeviceInfo(lInfo).RegistrationID));
         end;
       WindowsPhonePushDeviceInfo: begin
           lDeviceNode.Add(new XAttribute('URI', WindowsPushDeviceInfo(lInfo).URI.ToString()));
@@ -187,7 +189,7 @@ end;
 
 method PushDeviceManager.Load;
 begin
-  fDevices := new Dictionary<String,PushDeviceInfo>;
+  fDevices.Clear();
 
   if assigned(DeviceStoreFile) and File.Exists(DeviceStoreFile) then begin
 
@@ -200,7 +202,7 @@ begin
       case lType of
         nil, 
         'APS': lInfo := new ApplePushDeviceInfo();
-        'GCM': lInfo := new AndroidPushDeviceInfo();
+        'GCM': lInfo := new GooglePushDeviceInfo();
         'WNS': lInfo := new WindowsPushDeviceInfo();
         'MPNS': lInfo := new WindowsPhonePushDeviceInfo();
       end;
@@ -211,8 +213,8 @@ begin
             ApplePushDeviceInfo(lInfo).Token := StringToBinary(lToken);
             ApplePushDeviceInfo(lInfo).SubType := coalesce(lDeviceNode.Attribute('SubType'):Value, 'iOS');
           end;
-        AndroidPushDeviceInfo: begin
-            AndroidPushDeviceInfo(lInfo).RegistrationID := lDeviceNode.Attribute('RegistrationID').Value;
+        GooglePushDeviceInfo: begin
+            GooglePushDeviceInfo(lInfo).RegistrationID := lDeviceNode.Attribute('RegistrationID').Value;
           end;
         WindowsPhonePushDeviceInfo: begin
             WindowsPushDeviceInfo(lInfo).URI := new Uri(lDeviceNode.Attribute('URL').Value);

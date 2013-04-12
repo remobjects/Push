@@ -1,4 +1,4 @@
-﻿namespace RemObjects.SDK.ApplePushProvider;
+﻿namespace RemObjects.SDK.Push;
 
 interface
 
