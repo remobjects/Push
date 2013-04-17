@@ -132,6 +132,7 @@
       <DisableDesigner>True</DisableDesigner>
     </Compile>
     <Compile Include="APSConnect.pas" />
+    <Compile Include="DeviceManager.pas" />
     <Compile Include="GCMConnect.pas" />
     <Compile Include="GooglePushProviderService_Impl.pas">
       <SubType>Component</SubType>
@@ -147,7 +148,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
     </None>
     <Compile Include="Properties\Settings.Designer.pas" />
-    <Compile Include="PushDeviceManager.pas" />
+    <Compile Include="PushManager.pas" />
     <EmbeddedResource Include="PushProvider.RODL" />
     <Compile Include="PushProvider_Intf.pas" />
     <Compile Include="PushProvider_Invk.pas" />
@@ -161,4 +162,7 @@
     </MonoDevelop>
   </ProjectExtensions>
   <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
+  <PropertyGroup>
+    <PreBuildEvent />
+  </PropertyGroup>
 </Project>
