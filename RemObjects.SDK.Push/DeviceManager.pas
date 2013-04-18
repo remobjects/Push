@@ -42,7 +42,6 @@ type
 
   FileDeviceManager = public class (InMemoryDeviceManager, IDeviceManager, IDeviceStorage)
   private
-    fDevices: Dictionary<String, PushDeviceInfo> := new Dictionary<String, PushDeviceInfo>();
     fFilename: String; 
     method set_Filename(value: String);
   public
