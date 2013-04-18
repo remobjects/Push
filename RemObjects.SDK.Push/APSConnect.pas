@@ -11,7 +11,8 @@ uses
   System.Security.Cryptography.X509Certificates,
   System.Security.Permissions,
   System.Text,
-  RemObjects.SDK;
+  RemObjects.SDK,
+  RemObjects.SDK.Types;
 
 type
   APSConnect = public class(IDisposable)
@@ -49,6 +50,9 @@ type
 
     property ApsFeedbackHost: String := 'feedback.sandbox.push.apple.com';
     property ApsFeedbackPort: Int32 := 2196;
+    
+    class method StringToBinary(aString: String): RemObjects.SDK.Types.Binary;
+    class method BinaryToString(aBinary: RemObjects.SDK.Types.Binary): String;
   end;
   
 implementation
@@ -252,6 +256,26 @@ begin
   var lData := Mono.Security.X509.PKCS12.LoadFromFile(value, nil);
   fiOSCertificate := new X509Certificate2(lData.Certificates[0].RawData);
   fiOSCertificate.PrivateKey := System.Security.Cryptography.AsymmetricAlgorithm(lData.Keys[0]);
+end;
+
+class method APSConnect.BinaryToString(aBinary: Binary):String;
+begin
+  var sb := new StringBuilder;
+  for i: Int32 := 0 to 31 do begin
+    sb.Append(String.Format('{0:x2}',aBinary.ToArray[i]));
+    //if i < 31 then sb.Append('-');
+  end;
+  result := sb.ToString;
+end;
+
+class method APSConnect.StringToBinary(aString: String):Binary;
+begin
+  var aArray := new Byte[32];
+  for i: Int32 := 0 to 31 do begin
+    var s := aString.Substring(i*2, 2);
+    aArray[i] := Int32.Parse(s, System.Globalization.NumberStyles.HexNumber);
+  end;
+  result := new Binary(aArray);
 end;
 
 end.
