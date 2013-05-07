@@ -49,7 +49,7 @@ constructor GooglePushProviderService;
 begin
   inherited constructor();
   self.InitializeComponent();
-  self.RequireSession := PushDeviceManager.Instance.RequireSession;
+  self.RequireSession := PushManager.Instance.RequireSession;
 end;
 
 method GooglePushProviderService.InitializeComponent;
@@ -72,17 +72,18 @@ begin
 end;
 
 method GooglePushProviderService.registerDevice(registrationId: System.String; additionalInfo: System.String);
+var lPush := RemObjects.SDK.Push.PushManager.Instance;
 begin
   try
     Log('Push(GCM) registration for '+ registrationId);
-    if PushDeviceManager.Instance.Devices.ContainsKey(registrationId) then begin
+    var lDevice: PushDeviceInfo;
+    if lPush.DeviceManager.TryGetDevice(registrationId, out lDevice) then begin
       Log('Push(GCM) registration updated for '+ registrationId);
 
-      var p := PushDeviceManager.Instance.Devices[registrationId];
-      p.ClientInfo := additionalInfo;
-      p.LastSeen := DateTime.Now;
-      PushDeviceManager.Instance.Flush;
-      PushDeviceManager.Instance.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.EntryUpdated));
+      lDevice.ClientInfo := additionalInfo;
+      lDevice.LastSeen := DateTime.Now;
+      lPush.Flush;
+      lPush.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.EntryUpdated));
     end
     else begin
       Log('Push(GCM) registration new for '+ registrationId);
@@ -91,9 +92,9 @@ begin
                                        ClientInfo := additionalInfo, 
                                        ServerInfo := nil,
                                        LastSeen := DateTime.Now);
-      PushDeviceManager.Instance.Devices.Add(registrationId, p);
-      PushDeviceManager.Instance.Flush;
-      PushDeviceManager.Instance.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.Registered));
+      lPush.DeviceManager.AddDevice(registrationId, p);
+      lPush.Flush;
+      lPush.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.Registered));
     end;
   except
     on E:Exception do begin
@@ -104,10 +105,12 @@ begin
 end;
 
 method GooglePushProviderService.unregisterDevice(registrationId: System.String);
+var lPush := PushManager.Instance;
 begin
-  PushDeviceManager.Instance.Devices.Remove(registrationId);
-  PushDeviceManager.Instance.Flush;
-  PushDeviceManager.Instance.DeviceUnregistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.Unregistered));
+  if (lPush.DeviceManager.RemoveDevice(registrationId)) then begin
+    lPush.Flush;
+    lPush.DeviceUnregistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.Unregistered));
+  end;
 end;
 
 end.
