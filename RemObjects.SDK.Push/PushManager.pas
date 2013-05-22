@@ -107,8 +107,6 @@ begin
   fDeviceManager := aDeviceManager;
 end;
 
-
-
 method PushManager.Flush;
 require
   assigned(fDeviceManager);

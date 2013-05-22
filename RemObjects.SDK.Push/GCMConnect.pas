@@ -71,28 +71,19 @@ type
   private
     const GCM_SEND_URL: String = 'https://android.googleapis.com/gcm/send';
 
-    var fSenderApiKey: String := String.Empty;
-
     method PreparePushRequestBody(aMessage: GCMMessage): String;
     method ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: GCMMessage; out aResponse: GCMResponse);
   protected
   public
-    property SenderApiKey: String read fSenderApiKey;
+    property SenderApiKey: String;
     method PushMessage(aMessage: GCMMessage);
     method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
 
-    constructor(aSenderApiKey: String);
+    constructor; empty;
 
   end;
 
 implementation
-
-constructor GCMConnect(aSenderApiKey: String);
-require
-  not String.IsNullOrEmpty(aSenderApiKey);
-begin
-  self.fSenderApiKey := aSenderApiKey;
-end;
 
 // on error: should raise GCMException
 method GCMConnect.PushMessage(aMessage: GCMMessage);
@@ -111,7 +102,7 @@ begin
   lWebRequest.Method := 'POST';
   lWebRequest.ContentType := 'application/json';
   lWebRequest.UserAgent := 'RemObjects.SDK.Push';
-  lWebRequest.Headers.Add('Authorization: key=' + self.fSenderApiKey);  
+  lWebRequest.Headers.Add('Authorization: key=' + self.SenderApiKey);  
   var lRequestBody := self.PreparePushRequestBody(aMessage);
 
   using lStream := lWebRequest.GetRequestStream() do begin

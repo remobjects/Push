@@ -37,18 +37,18 @@ type
     property MacCertificateFile: String write set_MacCertificateFile;
     property iOSCertificateFile: String write set_iOSCertificateFile;
 
-    method PushRawNotification(aDeviceToken: array of Byte; Json: String); // async;
-    method PushMessageNotification(aDeviceToken: array of Byte; aMessage: String);
-    method PushBadgeNotification(aDeviceToken: array of Byte; aBadge: Int32);
-    method PushAudioNotification(aDeviceToken: array of Byte; aSound: String);
-    method PushCombinedNotification(aDeviceToken: array of Byte; aMessage: String; aBadge: nullable Int32; aSound: String);
+    method PushRawNotification(aDeviceToken: Binary; Json: String); // async;
+    method PushMessageNotification(aDeviceToken: Binary; aMessage: String);
+    method PushBadgeNotification(aDeviceToken: Binary; aBadge: Int32);
+    method PushAudioNotification(aDeviceToken: Binary; aSound: String);
+    method PushCombinedNotification(aDeviceToken: Binary; aMessage: String; aBadge: nullable Int32; aSound: String);
 
     method GetFeedback;
 
-    property ApsHost: String := 'gateway.sandbox.push.apple.com';
+    property ApsHost: String := 'gateway.push.apple.com';
     property ApsPort: Int32 := 2195;
 
-    property ApsFeedbackHost: String := 'feedback.sandbox.push.apple.com';
+    property ApsFeedbackHost: String := 'feedback.push.apple.com';
     property ApsFeedbackPort: Int32 := 2196;
     
     class method StringToBinary(aString: String): RemObjects.SDK.Types.Binary;
@@ -103,7 +103,7 @@ begin
     if c.SubjectName.Name.Contains(aName) then exit c;
 end;
 
-method APSConnect.PushRawNotification(aDeviceToken: array of Byte; Json: String);
+method APSConnect.PushRawNotification(aDeviceToken: Binary; Json: String);
 require
   aDeviceToken.Length = 32;
   assigned(fiOSCertificate);
@@ -119,7 +119,7 @@ begin
       using m := new MemoryStream() do begin
         using w := new BinaryWriter(m) do begin
           w.Write([0,0,32]);
-          w.Write(aDeviceToken);
+          w.Write(aDeviceToken.ToArray());
           var data := Encoding.UTF8.GetBytes(Json);
           w.Write([Byte(data.Length and $ff00 div $100), Byte(data.Length and $ff)]);
           w.Write(data);
@@ -160,26 +160,26 @@ begin
   Log('3d');
 end;
 
-method APSConnect.PushMessageNotification(aDeviceToken: array of Byte; aMessage: String);
+method APSConnect.PushMessageNotification(aDeviceToken: Binary; aMessage: String);
 begin
   //todo: escape illegal JSON chars in message
   var lJson := String.Format('{{"aps":{{"alert":{0}}}}}',  JsonTokenizer.EncodeString(aMessage));
   PushRawNotification(aDeviceToken, lJson);
 end;
 
-method APSConnect.PushBadgeNotification(aDeviceToken: array of Byte; aBadge: Int32);
+method APSConnect.PushBadgeNotification(aDeviceToken: Binary; aBadge: Int32);
 begin
   var lJson := String.Format('{{"aps":{{"badge":{0}}}}}', aBadge);
   PushRawNotification(aDeviceToken, lJson);
 end;
 
-method APSConnect.PushAudioNotification(aDeviceToken: array of Byte; aSound: String);
+method APSConnect.PushAudioNotification(aDeviceToken: Binary; aSound: String);
 begin
   var lJson := String.Format('{{"aps":{{"sound":{0}}}}}',  JsonTokenizer.EncodeString(aSound));
   PushRawNotification(aDeviceToken, lJson);
 end;
 
-method APSConnect.PushCombinedNotification(aDeviceToken: array of Byte; aMessage: String; aBadge: nullable Int32; aSound: String);
+method APSConnect.PushCombinedNotification(aDeviceToken: Binary; aMessage: String; aBadge: nullable Int32; aSound: String);
 begin
   Log('2a');
   var lData := '';

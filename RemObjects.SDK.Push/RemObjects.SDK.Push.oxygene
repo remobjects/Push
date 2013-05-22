@@ -134,6 +134,7 @@
     <Compile Include="APSConnect.pas" />
     <Compile Include="DeviceManager.pas" />
     <Compile Include="GCMConnect.pas" />
+    <Compile Include="GenericPushConnect.pas" />
     <Compile Include="GooglePushProviderService_Impl.pas">
       <SubType>Component</SubType>
       <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
@@ -161,7 +162,7 @@
       <Properties InternalTargetFrameworkVersion="3.5" />
     </MonoDevelop>
   </ProjectExtensions>
-  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.targets" />
+  <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Oxygene\RemObjects.Oxygene.Echoes.targets" />
   <PropertyGroup>
     <PreBuildEvent />
   </PropertyGroup>
