@@ -76,12 +76,6 @@ type
     // Toggles whether Users need to Log in before registering devices
     property RequireSession: Boolean;
 
-    {method PushMessageNotificationToAllDevices(aMessage: String);
-    method PushBadgeNotificationToAllDevices(aBadge: Int32);
-    method PushAudioNotificationToAllDevices(aSound: String);
-    method PushCombinedNotificationToAllDevices(aMessage: String; aBadge: nullable Int32; aSound: String);}
-
-
     method Flush;
 
     event DeviceRegistered: DeviceEvent assembly raise;

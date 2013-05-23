@@ -18,6 +18,8 @@ type
     method PushMessageNotification(aDevice: PushDeviceInfo; aMessage: String);
     method PushBadgeNotification(aDevice: PushDeviceInfo; aBadge: Int32);
     method PushAudioNotification(aDevice: PushDeviceInfo; aSound: String);
+
+    method PushMessageAndBadgeNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
   end;
 
 implementation
@@ -40,6 +42,14 @@ method GenericPushConnect.PushAudioNotification(aDevice: PushDeviceInfo; aSound:
 begin
   case aDevice type of
     ApplePushDeviceInfo: APSConnect.PushAudioNotification((aDevice as ApplePushDeviceInfo).Token, aSound);
+  end;
+end;
+
+method GenericPushConnect.PushMessageAndBadgeNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
+begin
+  // nil value for aBadge means we clear the badge.
+  case aDevice type of
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo).Token, aMessage, valueOrDefault(aBadge), nil); // send 0 to clear the Badge, on APS
   end;
 end;
 
