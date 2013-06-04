@@ -75,7 +75,7 @@ type
     method ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: GCMMessage; out aResponse: GCMResponse);
   protected
   public
-    property SenderApiKey: String;
+    property ApiKey: String;
     method PushMessage(aMessage: GCMMessage);
     method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
 
@@ -102,7 +102,7 @@ begin
   lWebRequest.Method := 'POST';
   lWebRequest.ContentType := 'application/json';
   lWebRequest.UserAgent := 'RemObjects.SDK.Push';
-  lWebRequest.Headers.Add('Authorization: key=' + self.SenderApiKey);  
+  lWebRequest.Headers.Add('Authorization: key=' + self.ApiKey);  
   var lRequestBody := self.PreparePushRequestBody(aMessage);
 
   using lStream := lWebRequest.GetRequestStream() do begin

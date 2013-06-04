@@ -27,7 +27,14 @@ implementation
 method GenericPushConnect.PushMessageNotification(aDevice: PushDeviceInfo; aMessage: String);
 begin
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushMessageNotification((aDevice as ApplePushDeviceInfo).Token, aMessage);
+    ApplePushDeviceInfo: self.APSConnect.PushMessageNotification((aDevice as ApplePushDeviceInfo).Token, aMessage);
+    GooglePushDeviceInfo: begin
+      var gDevice := aDevice as GooglePushDeviceInfo;
+      var lMessage := new GCMMessage();
+      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
+      lMessage.Data.Add("message", aMessage);
+      self.GCMConnect.PushMessage(lMessage);
+    end;
   end;
 end;
 
@@ -35,6 +42,13 @@ method GenericPushConnect.PushBadgeNotification(aDevice: PushDeviceInfo; aBadge:
 begin
   case aDevice type of
     ApplePushDeviceInfo: APSConnect.PushBadgeNotification((aDevice as ApplePushDeviceInfo).Token, aBadge);
+    GooglePushDeviceInfo: begin
+      var gDevice := aDevice as GooglePushDeviceInfo;
+      var lMessage := new GCMMessage();
+      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
+      lMessage.Data.Add("badge", aBadge.ToString);
+      self.GCMConnect.PushMessage(lMessage);
+    end;
   end;
 end;
 
@@ -42,6 +56,13 @@ method GenericPushConnect.PushAudioNotification(aDevice: PushDeviceInfo; aSound:
 begin
   case aDevice type of
     ApplePushDeviceInfo: APSConnect.PushAudioNotification((aDevice as ApplePushDeviceInfo).Token, aSound);
+    GooglePushDeviceInfo: begin
+      var gDevice := aDevice as GooglePushDeviceInfo;
+      var lMessage := new GCMMessage();
+      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
+      lMessage.Data.Add("audio", aSound);
+      self.GCMConnect.PushMessage(lMessage);
+    end;
   end;
 end;
 
@@ -50,6 +71,14 @@ begin
   // nil value for aBadge means we clear the badge.
   case aDevice type of
     ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo).Token, aMessage, valueOrDefault(aBadge), nil); // send 0 to clear the Badge, on APS
+    GooglePushDeviceInfo: begin
+      var gDevice := aDevice as GooglePushDeviceInfo;
+      var lMessage := new GCMMessage();
+      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
+      lMessage.Data.Add("message", aMessage);
+      lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
+      self.GCMConnect.PushMessage(lMessage);
+    end;
   end;
 end;
 
