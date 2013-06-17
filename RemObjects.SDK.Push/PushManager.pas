@@ -17,7 +17,6 @@ uses
   RemObjects.SDK.Types;
 
 type
-
   PushDeviceInfo = public abstract class
   public
     property &Type: String read; abstract;

@@ -23,12 +23,13 @@ type
     fSslStream: SslStream;
     {$ENDIF}
     fTcpClient: System.Net.Sockets.TcpClient;
-    fMacCertificate, fiOSCertificate: X509Certificate2;
+    fMacCertificate, fiOSCertificate, fWebCertificate: X509Certificate2;
     method CreateStream;
     method FindCertificate(aName: String): X509Certificate2;
     method Log(aMessage: String);
     method set_MacCertificateFile(value: String);
     method set_iOSCertificateFile(value: String);
+    method set_WebCertificateFile(value: String);
   protected
   public
     method Dispose;
@@ -36,12 +37,16 @@ type
     // Filename for Certificate .p12
     property MacCertificateFile: String write set_MacCertificateFile;
     property iOSCertificateFile: String write set_iOSCertificateFile;
+    property WebCertificateFile: String write set_WebCertificateFile;
+    property MacCertificate: X509Certificate2 read fMacCertificate write fMacCertificate;
+    property iOSCertificate: X509Certificate2 read fiOSCertificate write fiOSCertificate;
+    property WebCertificate: X509Certificate2 read fWebCertificate write fWebCertificate;
 
-    method PushRawNotification(aDeviceToken: Binary; Json: String); // async;
-    method PushMessageNotification(aDeviceToken: Binary; aMessage: String);
-    method PushBadgeNotification(aDeviceToken: Binary; aBadge: Int32);
-    method PushAudioNotification(aDeviceToken: Binary; aSound: String);
-    method PushCombinedNotification(aDeviceToken: Binary; aMessage: String; aBadge: nullable Int32; aSound: String);
+    method PushRawNotification(aDevice: ApplePushDeviceInfo; Json: String); // async;
+    method PushMessageNotification(aDevice: ApplePushDeviceInfo; aMessage: String);
+    method PushBadgeNotification(aDevice: ApplePushDeviceInfo; aBadge: Int32);
+    method PushAudioNotification(aDevice: ApplePushDeviceInfo; aSound: String);
+    method PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
 
     method GetFeedback;
 
@@ -103,14 +108,20 @@ begin
     if c.SubjectName.Name.Contains(aName) then exit c;
 end;
 
-method APSConnect.PushRawNotification(aDeviceToken: Binary; Json: String);
+method APSConnect.PushRawNotification(aDevice: ApplePushDeviceInfo; Json: String);
 require
-  aDeviceToken.Length = 32;
-  assigned(fiOSCertificate);
+  aDevice.Token.Length = 32;
   assigned(ApsHost);
   ApsPort > 0;
-begin 
-  Log('3a');
+begin
+  var lCert := case aDevice.SubType of
+                 'iOS': iOSCertificate;
+                 'Mac': MacCertificate;
+                 'Web': WebCertificate;
+                 //else raise new Exception('Unexpected APS device type "'+aDevice.SubType+'"');
+               end;
+  if not assigned(lCert) then raise new Exception('No APS certificate configuref for device type "'+aDevice.SubType+'"');
+
   Log(Json);
   locking self do begin
     Log('3b');
@@ -119,7 +130,7 @@ begin
       using m := new MemoryStream() do begin
         using w := new BinaryWriter(m) do begin
           w.Write([0,0,32]);
-          w.Write(aDeviceToken.ToArray());
+          w.Write(aDevice.Token.ToArray());
           var data := Encoding.UTF8.GetBytes(Json);
           w.Write([Byte(data.Length and $ff00 div $100), Byte(data.Length and $ff)]);
           w.Write(data);
@@ -157,31 +168,29 @@ begin
 
     Log('3c');
   end;
-  Log('3d');
 end;
 
-method APSConnect.PushMessageNotification(aDeviceToken: Binary; aMessage: String);
+method APSConnect.PushMessageNotification(aDevice: ApplePushDeviceInfo; aMessage: String);
 begin
   //todo: escape illegal JSON chars in message
   var lJson := String.Format('{{"aps":{{"alert":{0}}}}}',  JsonTokenizer.EncodeString(aMessage));
-  PushRawNotification(aDeviceToken, lJson);
+  PushRawNotification(aDevice, lJson);
 end;
 
-method APSConnect.PushBadgeNotification(aDeviceToken: Binary; aBadge: Int32);
+method APSConnect.PushBadgeNotification(aDevice: ApplePushDeviceInfo; aBadge: Int32);
 begin
   var lJson := String.Format('{{"aps":{{"badge":{0}}}}}', aBadge);
-  PushRawNotification(aDeviceToken, lJson);
+  PushRawNotification(aDevice, lJson);
 end;
 
-method APSConnect.PushAudioNotification(aDeviceToken: Binary; aSound: String);
+method APSConnect.PushAudioNotification(aDevice: ApplePushDeviceInfo; aSound: String);
 begin
   var lJson := String.Format('{{"aps":{{"sound":{0}}}}}',  JsonTokenizer.EncodeString(aSound));
-  PushRawNotification(aDeviceToken, lJson);
+  PushRawNotification(aDevice, lJson);
 end;
 
-method APSConnect.PushCombinedNotification(aDeviceToken: Binary; aMessage: String; aBadge: nullable Int32; aSound: String);
+method APSConnect.PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
 begin
-  Log('2a');
   var lData := '';
   if assigned(aMessage) then begin
     lData := lData+String.Format('"alert":{0}', JsonTokenizer.EncodeString(aMessage));
@@ -195,11 +204,8 @@ begin
     lData := lData+String.Format('"sound":{0}',  JsonTokenizer.EncodeString(aSound));
   end;
 
-  Log('2b');
   var lJson := String.Format('{{"aps":{{{0}}}}}', lData);
-  Log('2c');
-  PushRawNotification(aDeviceToken, lJson);
-  Log('2d');
+  PushRawNotification(aDevice, lJson);
 end;
 
 method APSConnect.Dispose;
@@ -256,6 +262,13 @@ begin
   var lData := Mono.Security.X509.PKCS12.LoadFromFile(value, nil);
   fiOSCertificate := new X509Certificate2(lData.Certificates[0].RawData);
   fiOSCertificate.PrivateKey := System.Security.Cryptography.AsymmetricAlgorithm(lData.Keys[0]);
+end;
+
+method APSConnect.set_WebCertificateFile(value: String);
+begin
+  var lData := Mono.Security.X509.PKCS12.LoadFromFile(value, nil);
+  fWebCertificate := new X509Certificate2(lData.Certificates[0].RawData);
+  fWebCertificate.PrivateKey := System.Security.Cryptography.AsymmetricAlgorithm(lData.Keys[0]);
 end;
 
 class method APSConnect.BinaryToString(aBinary: Binary):String;

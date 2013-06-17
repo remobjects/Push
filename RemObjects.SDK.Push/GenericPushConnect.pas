@@ -27,7 +27,7 @@ implementation
 method GenericPushConnect.PushMessageNotification(aDevice: PushDeviceInfo; aMessage: String);
 begin
   case aDevice type of
-    ApplePushDeviceInfo: self.APSConnect.PushMessageNotification((aDevice as ApplePushDeviceInfo).Token, aMessage);
+    ApplePushDeviceInfo: self.APSConnect.PushMessageNotification((aDevice as ApplePushDeviceInfo), aMessage);
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
       var lMessage := new GCMMessage();
@@ -41,7 +41,7 @@ end;
 method GenericPushConnect.PushBadgeNotification(aDevice: PushDeviceInfo; aBadge: Int32);
 begin
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushBadgeNotification((aDevice as ApplePushDeviceInfo).Token, aBadge);
+    ApplePushDeviceInfo: APSConnect.PushBadgeNotification((aDevice as ApplePushDeviceInfo), aBadge);
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
       var lMessage := new GCMMessage();
@@ -55,7 +55,7 @@ end;
 method GenericPushConnect.PushAudioNotification(aDevice: PushDeviceInfo; aSound: String);
 begin
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushAudioNotification((aDevice as ApplePushDeviceInfo).Token, aSound);
+    ApplePushDeviceInfo: APSConnect.PushAudioNotification((aDevice as ApplePushDeviceInfo), aSound);
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
       var lMessage := new GCMMessage();
@@ -70,7 +70,7 @@ method GenericPushConnect.PushMessageAndBadgeNotification(aDevice: PushDeviceInf
 begin
   // nil value for aBadge means we clear the badge.
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo).Token, aMessage, valueOrDefault(aBadge), nil); // send 0 to clear the Badge, on APS
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), nil); // send 0 to clear the Badge, on APS
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
       var lMessage := new GCMMessage();
@@ -83,3 +83,4 @@ begin
 end;
 
 end.
+
