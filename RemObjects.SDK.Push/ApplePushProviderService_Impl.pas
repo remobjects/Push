@@ -33,7 +33,7 @@ constructor ApplePushProviderService;
 begin
   inherited constructor();
   self.InitializeComponent();
-  self.RequireSession := PushManager.Instance.RequireSession;
+  self.RequireSession := PushManager.RequireSession;
 end;
 
 method ApplePushProviderService.Log(aMessage: String);
@@ -56,19 +56,18 @@ begin
 end;
 
 method ApplePushProviderService.registerDevice(deviceToken: RemObjects.SDK.Types.Binary; additionalInfo: System.String);
-var lPush := PushManager.Instance;
 begin
   try
     var lStringToken := APSConnect.BinaryToString(deviceToken);
     Log('Push registration for '+ lStringToken);
     var lDevice: PushDeviceInfo;
-    if lPush.DeviceManager.TryGetDevice(lStringToken, out lDevice) then begin
+    if PushManager.DeviceManager.TryGetDevice(lStringToken, out lDevice) then begin
       Log('Push registration updated for '+lStringToken);
 
       lDevice.ClientInfo := additionalInfo;
       lDevice.LastSeen := DateTime.Now;
-      lPush.Flush;
-      lPush.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Registered));
+      PushManager.Save;
+      PushManager.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Registered));
     end
     else begin
       Log('Push registration new for '+ lStringToken);
@@ -78,8 +77,8 @@ begin
                                        ClientInfo := additionalInfo, 
                                        ServerInfo := nil,
                                        LastSeen := DateTime.Now);
-      lPush.DeviceManager.AddDevice(lStringToken, lDevice);
-      lPush.Flush;
+      PushManager.DeviceManager.AddDevice(lStringToken, lDevice);
+      PushManager.Save;
     end;
   except
     on E:Exception do begin
@@ -90,12 +89,11 @@ begin
 end;
 
 method ApplePushProviderService.unregisterDevice(deviceToken: RemObjects.SDK.Types.Binary);
-var lPush := PushManager.Instance;
 begin
   var lStringToken := APSConnect.BinaryToString(deviceToken);
-  if (lPush.DeviceManager.RemoveDevice(lStringToken)) then begin
-    lPush.Flush;
-    lPush.DeviceUnregistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Unregistered));
+  if (PushManager.DeviceManager.RemoveDevice(lStringToken)) then begin
+    PushManager.Save;
+    PushManager.DeviceUnregistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Unregistered));
   end;
 end;
 

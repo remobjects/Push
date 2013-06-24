@@ -10,6 +10,8 @@ uses
 type
   GenericPushConnect = public class
   private
+    class var fInstance: GenericPushConnect;
+    class method get_Instance: GenericPushConnect;
   protected
   public
     property APSConnect: APSConnect := new APSConnect; readonly;
@@ -20,6 +22,9 @@ type
     method PushAudioNotification(aDevice: PushDeviceInfo; aSound: String);
 
     method PushMessageAndBadgeNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
+    method PushMessageBadgeAndSoundNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
+
+    class property Instance: GenericPushConnect read get_Instance;
   end;
 
 implementation
@@ -77,6 +82,29 @@ begin
       lMessage.RegistrationIds.Add(gDevice.RegistrationID);
       lMessage.Data.Add("message", aMessage);
       lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
+      self.GCMConnect.PushMessage(lMessage);
+    end;
+  end;
+end;
+
+class method GenericPushConnect.get_Instance: GenericPushConnect;
+begin
+  if not assigned(fInstance) then fInstance := new GenericPushConnect();
+  result := fInstance;
+end;
+
+method GenericPushConnect.PushMessageBadgeAndSoundNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
+begin
+  // nil value for aBadge means we clear the badge.
+  case aDevice type of
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), aSound); // send 0 to clear the Badge, on APS
+    GooglePushDeviceInfo: begin
+      var gDevice := aDevice as GooglePushDeviceInfo;
+      var lMessage := new GCMMessage();
+      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
+      lMessage.Data.Add("message", aMessage);
+      lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
+      if assigned(aSound) then lMessage.Data.Add("sound", aSound);
       self.GCMConnect.PushMessage(lMessage);
     end;
   end;

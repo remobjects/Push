@@ -41,6 +41,7 @@ type
     property MacCertificate: X509Certificate2 read fMacCertificate write fMacCertificate;
     property iOSCertificate: X509Certificate2 read fiOSCertificate write fiOSCertificate;
     property WebCertificate: X509Certificate2 read fWebCertificate write fWebCertificate;
+    method LoadCertificatesFromBaseFilename(aFilename: String);
 
     method PushRawNotification(aDevice: ApplePushDeviceInfo; Json: String); // async;
     method PushMessageNotification(aDevice: ApplePushDeviceInfo; aMessage: String);
@@ -289,6 +290,25 @@ begin
     aArray[i] := Int32.Parse(s, System.Globalization.NumberStyles.HexNumber);
   end;
   result := new Binary(aArray);
+end;
+
+method APSConnect.LoadCertificatesFromBaseFilename(aFilename: String);
+begin
+  var lCertificatePath := Path.ChangeExtension(aFilename, 'iOS.p12');
+  if File.Exists(lCertificatePath) then begin
+   iOSCertificateFile := lCertificatePath;
+    Log('Loaded Apple iOS Push Certificate from '+lCertificatePath);
+  end;
+  lCertificatePath := Path.ChangeExtension(aFilename, 'Mac.p12');
+  if File.Exists(lCertificatePath) then begin
+   MacCertificateFile := lCertificatePath;
+    Log('Loaded Apple Mac Push Certificate from '+lCertificatePath);
+  end;
+  lCertificatePath := Path.ChangeExtension(aFilename, 'Web.p12');
+  if File.Exists(lCertificatePath) then begin
+    WebCertificateFile := lCertificatePath;
+    Log('Loaded Apple Web Push Certificate from '+lCertificatePath);
+  end;
 end;
 
 end.

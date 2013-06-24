@@ -57,25 +57,19 @@ type
     property OSVersion: String;
   end;
 
-  PushManager = public class
+  PushManager = public static class
   private
     fDeviceManager: IDeviceManager;
-    class var fInstance: PushManager;
-    class method get_Instance: PushManager;
     method Set_DeviceManager(aDeviceManager: IDeviceManager);
   assembly
   public
-    constructor; empty;
-    constructor (aDeviceManager: IDeviceManager);
-
-    class property Instance: PushManager read get_Instance;
-
     property DeviceManager: IDeviceManager read fDeviceManager write Set_DeviceManager;
+    property PushConnect: GenericPushConnect read GenericPushConnect.Instance;
 
     // Toggles whether Users need to Log in before registering devices
     property RequireSession: Boolean;
 
-    method Flush;
+    method Save;
 
     event DeviceRegistered: DeviceEvent assembly raise;
     event DeviceUnregistered: DeviceEvent assembly raise;
@@ -93,64 +87,22 @@ type
 
 implementation
 
-constructor PushManager(aDeviceManager: IDeviceManager);
-require
-  assigned(aDeviceManager);
-begin
-  fDeviceManager := aDeviceManager;
-end;
-
-method PushManager.Flush;
+method PushManager.Save;
 require
   assigned(fDeviceManager);
 begin
-  if (fDeviceManager is RemObjects.SDK.Push.IDeviceStorage) then
+  if assigned(fDeviceManager) and (fDeviceManager is IDeviceStorage) then
     IDeviceStorage(fDeviceManager).Save();
-end;
-
-
-class method PushManager.get_Instance: PushManager;
-begin
-  if not assigned(fInstance) then fInstance := new PushManager;
-  result := fInstance;
 end;
 
 method PushManager.Set_DeviceManager(aDeviceManager: IDeviceManager);
 require
   assigned(aDeviceManager);
 begin
-  if (fDeviceManager <> aDeviceManager) then begin
-    if (fDeviceManager <> nil) then
-      Flush();
+  if (fDeviceManager ≠ aDeviceManager) then begin
+    Save();
     fDeviceManager := aDeviceManager;
   end;
 end;
-
-
-
-
-{method PushDeviceManager.PushMessageNotificationToAllDevices(aMessage: String);
-begin
-  for each d in fDevices.Values do 
-  //  fAPSConnect.PushMessageNotification(d.Token.ToArray, aMessage);
-end;
-
-method PushDeviceManager.PushBadgeNotificationToAllDevices(aBadge: Int32);
-begin
-  for each d in fDevices.Values do 
-  //  fAPSConnect.PushBadgeNotification(d.Token.ToArray, aBadge);
-end;
-
-method PushDeviceManager.PushAudioNotificationToAllDevices(aSound: String);
-begin
-  for each d in fDevices.Values do 
- //   fAPSConnect.PushAudioNotification(d.Token.ToArray, aSound);
-end;
-
-method PushDeviceManager.PushCombinedNotificationToAllDevices(aMessage: String; aBadge: nullable Int32; aSound: String);
-begin
-  for each d in fDevices.Values do 
- //   fAPSConnect.PushCombinedNotification(d.Token.ToArray, aMessage, aBadge, aSound);
-end;}
 
 end.
