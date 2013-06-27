@@ -12,6 +12,8 @@ type
   private
     class var fInstance: GenericPushConnect;
     class method get_Instance: GenericPushConnect;
+    
+    method sendGcmMessage(aMessage: GCMMessage);
   protected
   public
     property APSConnect: APSConnect := new APSConnect; readonly;
@@ -25,6 +27,7 @@ type
     method PushMessageBadgeAndSoundNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
 
     class property Instance: GenericPushConnect read get_Instance;
+
   end;
 
 implementation
@@ -38,7 +41,8 @@ begin
       var lMessage := new GCMMessage();
       lMessage.RegistrationIds.Add(gDevice.RegistrationID);
       lMessage.Data.Add("message", aMessage);
-      self.GCMConnect.PushMessage(lMessage);
+      self.sendGcmMessage(lMessage);
+      
     end;
   end;
 end;
@@ -52,7 +56,7 @@ begin
       var lMessage := new GCMMessage();
       lMessage.RegistrationIds.Add(gDevice.RegistrationID);
       lMessage.Data.Add("badge", aBadge.ToString);
-      self.GCMConnect.PushMessage(lMessage);
+      self.sendGcmMessage(lMessage);
     end;
   end;
 end;
@@ -66,7 +70,7 @@ begin
       var lMessage := new GCMMessage();
       lMessage.RegistrationIds.Add(gDevice.RegistrationID);
       lMessage.Data.Add("audio", aSound);
-      self.GCMConnect.PushMessage(lMessage);
+      self.sendGcmMessage(lMessage);
     end;
   end;
 end;
@@ -82,7 +86,7 @@ begin
       lMessage.RegistrationIds.Add(gDevice.RegistrationID);
       lMessage.Data.Add("message", aMessage);
       lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
-      self.GCMConnect.PushMessage(lMessage);
+      self.sendGcmMessage(lMessage);
     end;
   end;
 end;
@@ -105,8 +109,19 @@ begin
       lMessage.Data.Add("message", aMessage);
       lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
       if assigned(aSound) then lMessage.Data.Add("sound", aSound);
-      self.GCMConnect.PushMessage(lMessage);
+      self.sendGcmMessage(lMessage);
     end;
+  end;
+end;
+
+method GenericPushConnect.sendGcmMessage(aMessage: GCMMessage);
+begin
+  var lDummyResponse: GCMResponse;
+  if (not self.GCMConnect.TryPushMessage(aMessage, out lDummyResponse)) then begin
+    // need to do something here
+    // - log error
+    // - raise PushMessageFailed event with additional info about error
+    //   in this case user app can - let's say - remove broken regId from DB
   end;
 end;
 

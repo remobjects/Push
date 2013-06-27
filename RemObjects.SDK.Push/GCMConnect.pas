@@ -94,7 +94,7 @@ begin
   end;
 end;
 
-// on error: should return false, and our GmcResponse with error filled 
+// on error: should return false, and out GmcResponse with error filled 
 method GCMConnect.TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
 begin
 
