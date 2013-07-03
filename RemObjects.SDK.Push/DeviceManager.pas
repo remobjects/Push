@@ -86,7 +86,7 @@ begin
     lDeviceNode.Add(new XAttribute('Type', lInfo.Type));
     case lInfo type of
       ApplePushDeviceInfo: begin
-          lDeviceNode.Add(new XAttribute('Token', APSConnect.BinaryToString(ApplePushDeviceInfo(lInfo).Token)));
+          lDeviceNode.Add(new XAttribute('Token', APSConnect.ByteArrayToString(ApplePushDeviceInfo(lInfo).Token)));
           lDeviceNode.Add(new XAttribute('SubType', ApplePushDeviceInfo(lInfo).SubType));
         end;
       GooglePushDeviceInfo: begin
@@ -135,7 +135,7 @@ begin
       case lInfo type of
         ApplePushDeviceInfo: begin
             var lToken := lDeviceNode.Attribute('Token').Value;
-            ApplePushDeviceInfo(lInfo).Token := APSConnect.StringToBinary(lToken);
+            ApplePushDeviceInfo(lInfo).Token := APSConnect.StringToByteArray(lToken);
             ApplePushDeviceInfo(lInfo).SubType := coalesce(lDeviceNode.Attribute('SubType'):Value, 'iOS');
           end;
         GooglePushDeviceInfo: begin

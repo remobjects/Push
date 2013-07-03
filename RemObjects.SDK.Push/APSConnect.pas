@@ -57,8 +57,8 @@ type
     property ApsFeedbackHost: String := 'feedback.push.apple.com';
     property ApsFeedbackPort: Int32 := 2196;
     
-    class method StringToBinary(aString: String): RemObjects.SDK.Types.Binary;
-    class method BinaryToString(aBinary: RemObjects.SDK.Types.Binary): String;
+    class method StringToByteArray(aString: String): array of Byte;
+    class method ByteArrayToString(aArray: array of Byte): String;
   end;
   
 implementation
@@ -131,7 +131,7 @@ begin
       using m := new MemoryStream() do begin
         using w := new BinaryWriter(m) do begin
           w.Write([0,0,32]);
-          w.Write(aDevice.Token.ToArray());
+          w.Write(aDevice.Token);
           var data := Encoding.UTF8.GetBytes(Json);
           w.Write([Byte(data.Length and $ff00 div $100), Byte(data.Length and $ff)]);
           w.Write(data);
@@ -272,24 +272,23 @@ begin
   fWebCertificate.PrivateKey := System.Security.Cryptography.AsymmetricAlgorithm(lData.Keys[0]);
 end;
 
-class method APSConnect.BinaryToString(aBinary: Binary):String;
+class method APSConnect.ByteArrayToString(aArray: array of Byte): String;
 begin
   var sb := new StringBuilder;
   for i: Int32 := 0 to 31 do begin
-    sb.Append(String.Format('{0:x2}',aBinary.ToArray[i]));
+    sb.Append(String.Format('{0:x2}',aArray[i]));
     //if i < 31 then sb.Append('-');
   end;
   result := sb.ToString;
 end;
 
-class method APSConnect.StringToBinary(aString: String):Binary;
+class method APSConnect.StringToByteArray(aString: String): array of Byte;
 begin
-  var aArray := new Byte[32];
+  result := new Byte[32];
   for i: Int32 := 0 to 31 do begin
     var s := aString.Substring(i*2, 2);
-    aArray[i] := Int32.Parse(s, System.Globalization.NumberStyles.HexNumber);
+    result[i] := Int32.Parse(s, System.Globalization.NumberStyles.HexNumber);
   end;
-  result := new Binary(aArray);
 end;
 
 method APSConnect.LoadCertificatesFromBaseFilename(aFilename: String);

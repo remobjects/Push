@@ -30,8 +30,8 @@ type
   ApplePushDeviceInfo = public class(PushDeviceInfo)
   public
     property &Type: String read 'APS'; override;
-    property ID: String read APSConnect.BinaryToString(Token); override;
-    property Token: Binary;
+    property ID: String read APSConnect.ByteArrayToString(Token); override;
+    property Token: array of Byte;
     property SubType: String;
   end;
 
