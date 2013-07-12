@@ -24,7 +24,7 @@ type
     {$ENDIF}
     fTcpClient: System.Net.Sockets.TcpClient;
     fMacCertificate, fiOSCertificate, fWebCertificate: X509Certificate2;
-    method CreateStream;
+    method CreateStream(aCertificate: X509Certificate2);
     method FindCertificate(aName: String): X509Certificate2;
     method Log(aMessage: String);
     method set_MacCertificateFile(value: String);
@@ -49,7 +49,7 @@ type
     method PushAudioNotification(aDevice: ApplePushDeviceInfo; aSound: String);
     method PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
 
-    method GetFeedback;
+    method GetFeedback(aCertificate: X509Certificate2);
 
     property ApsHost: String := 'gateway.push.apple.com';
     property ApsPort: Int32 := 2195;
@@ -63,13 +63,13 @@ type
   
 implementation
 
-method APSConnect.CreateStream;
+method APSConnect.CreateStream(aCertificate: X509Certificate2);
 require
-  assigned(fiOSCertificate);
+  assigned(aCertificate);
 begin
   fTcpClient := new System.Net.Sockets.TcpClient(ApsHost, ApsPort);
 {$IFDEF MONO}
-  fSslStream := new Mono.Security.Protocol.Tls.SslClientStream(fTcpClient.GetStream(), ApsHost, fiOSCertificate); 
+  fSslStream := new Mono.Security.Protocol.Tls.SslClientStream(fTcpClient.GetStream(), ApsHost, aCertificate); 
  // fSslStream.WriteTimeout := 120 000;
   fSslStream.PrivateKeyCertSelectionDelegate := method (certificate: X509Certificate; targetHost: String): AsymmetricAlgorithm; 
     begin
@@ -79,7 +79,7 @@ begin
     serverCertificate: X509Certificate; targetHost: String; 
     serverRequestedCertificates: X509CertificateCollection): X509Certificate; 
     begin
-      result := fiOSCertificate;  
+      result := aCertificate;  
     end;
   fSslStream.ServerCertValidationDelegate := method (certificate: X509Certificate; certificateErrors: array of Int32): Boolean; 
     begin
@@ -119,9 +119,8 @@ begin
                  'iOS': iOSCertificate;
                  'Mac': MacCertificate;
                  'Web': WebCertificate;
-                 //else raise new Exception('Unexpected APS device type "'+aDevice.SubType+'"');
                end;
-  if not assigned(lCert) then raise new Exception('No APS certificate configuref for device type "'+aDevice.SubType+'"');
+  if not assigned(lCert) then raise new Exception('No APS certificate configured for device type "'+aDevice.SubType+'"');
 
   Log(Json);
   locking self do begin
@@ -137,9 +136,9 @@ begin
           w.Write(data);
           w.Flush;
       
-          //todo: this is temp; we need to cache the connection but also proeprly recover from loss
-          Log('4a');
-          CreateStream;
+          //todo: this is temp; we need to cache the connection but also properly recover from loss
+          Log('4a '+i);
+          CreateStream(lCert);
           Log('4b');
           try
             fSslStream.Write(m.ToArray);
@@ -155,7 +154,6 @@ begin
             fSslStream := nil;
             fTcpClient := nil;
           end;
-          //Debug: StreamHelpers.SaveStreamToFile(m, 'w:\test.data');
         end;
       end;
       
@@ -215,12 +213,12 @@ begin
   fTcpClient.Close;
 end;
 
-method APSConnect.GetFeedback;
+method APSConnect.GetFeedback(aCertificate: X509Certificate2);
 require
-  assigned(fiOSCertificate);
+  assigned(aCertificate);
 begin
   var lTcpClient := new System.Net.Sockets.TcpClient(ApsFeedbackHost, ApsFeedbackPort);
-  using lSslStream := new Mono.Security.Protocol.Tls.SslClientStream(lTcpClient.GetStream(), ApsHost, fiOSCertificate) do begin
+  using lSslStream := new Mono.Security.Protocol.Tls.SslClientStream(lTcpClient.GetStream(), ApsHost, aCertificate) do begin
     
     lSslStream.PrivateKeyCertSelectionDelegate := method (certificate: X509Certificate; targetHost: String): AsymmetricAlgorithm; 
       begin
@@ -230,7 +228,7 @@ begin
       serverCertificate: X509Certificate; targetHost: String; 
       serverRequestedCertificates: X509CertificateCollection): X509Certificate; 
       begin
-        result := fiOSCertificate;  
+        result := aCertificate;  
       end;
     lSslStream.ServerCertValidationDelegate := method (certificate: X509Certificate; certificateErrors: array of Int32): Boolean; 
       begin
