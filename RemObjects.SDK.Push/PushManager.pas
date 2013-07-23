@@ -23,6 +23,9 @@ type
     fDeviceManager: IDeviceManager;
     method Set_DeviceManager(aDeviceManager: IDeviceManager);
   assembly
+    method AddDevice(anId: String; aDevice: PushDeviceInfo);
+    method RemoveDevice(anId: String): Boolean;
+    method UpdateDevice(aDevice: PushDeviceInfo; anAdditionalClientInfo: String);
   public
     property DeviceManager: IDeviceManager read fDeviceManager write Set_DeviceManager;
     property PushConnect: GenericPushConnect read GenericPushConnect.Instance;
@@ -63,6 +66,26 @@ begin
     Save();
     fDeviceManager := aDeviceManager;
   end;
+end;
+
+class method PushManager.AddDevice(anId: String; aDevice: PushDeviceInfo);
+begin
+  DeviceManager.AddDevice(anId, aDevice);
+  DeviceRegistered(DeviceManager, new DeviceEventArgs(DeviceToken := anId, Mode := DeviceEventArgs.EventMode.Registered));
+end;
+
+class method PushManager.RemoveDevice(anId: String): Boolean;
+begin
+  result := DeviceManager.RemoveDevice(anId);
+  if (result) then
+    DeviceUnregistered(DeviceManager, new DeviceEventArgs(DeviceToken := anId, Mode := DeviceEventArgs.EventMode.Unregistered));
+end;
+
+class method PushManager.UpdateDevice(aDevice: PushDeviceInfo; anAdditionalClientInfo: String);
+begin
+  aDevice.ClientInfo := anAdditionalClientInfo;
+  aDevice.LastSeen := DateTime.Now;
+  DeviceRegistered(DeviceManager, new DeviceEventArgs(DeviceToken := aDevice.ID, Mode := DeviceEventArgs.EventMode.EntryUpdated));
 end;
 
 end.

@@ -70,10 +70,8 @@ begin
     if PushManager.DeviceManager.TryGetDevice(lStringToken, out lDevice) then begin
       Log('Push registration updated for '+lStringToken);
 
-      lDevice.ClientInfo := additionalInfo;
-      lDevice.LastSeen := DateTime.Now;
+      PushManager.UpdateDevice(lDevice, additionalInfo);
       PushManager.Save;
-      PushManager.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Registered));
     end
     else begin
       Log('Push registration new for '+ lStringToken);
@@ -83,7 +81,8 @@ begin
                                        ClientInfo := additionalInfo, 
                                        ServerInfo := nil,
                                        LastSeen := DateTime.Now);
-      PushManager.DeviceManager.AddDevice(lStringToken, lDevice);
+
+      PushManager.AddDevice(lStringToken, lDevice);
       PushManager.Save;
     end;
   except
@@ -97,10 +96,8 @@ end;
 method ApplePushProviderService.unregisterDevice(deviceToken: RemObjects.SDK.Types.Binary);
 begin
   var lStringToken := BinaryToString(deviceToken);
-  if (PushManager.DeviceManager.RemoveDevice(lStringToken)) then begin
+  if (PushManager.RemoveDevice(lStringToken)) then
     PushManager.Save;
-    PushManager.DeviceUnregistered(self, new DeviceEventArgs(DeviceToken := lStringToken, Mode := DeviceEventArgs.EventMode.Unregistered));
-  end;
 end;
 
 end.

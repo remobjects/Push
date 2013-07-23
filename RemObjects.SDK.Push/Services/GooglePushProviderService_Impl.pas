@@ -79,10 +79,8 @@ begin
     if PushManager.DeviceManager.TryGetDevice(registrationId, out lDevice) then begin
       Log('Push(GCM) registration updated for '+ registrationId);
 
-      lDevice.ClientInfo := additionalInfo;
-      lDevice.LastSeen := DateTime.Now;
+      PushManager.UpdateDevice(lDevice, additionalInfo); 
       PushManager.Save;
-      PushManager.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.EntryUpdated));
     end
     else begin
       Log('Push(GCM) registration new for '+ registrationId);
@@ -91,9 +89,8 @@ begin
                                        ClientInfo := additionalInfo, 
                                        ServerInfo := nil,
                                        LastSeen := DateTime.Now);
-      PushManager.DeviceManager.AddDevice(registrationId, p);
+      PushManager.AddDevice(registrationId, p);      
       PushManager.Save;
-      PushManager.DeviceRegistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.Registered));
     end;
   except
     on E:Exception do begin
@@ -105,10 +102,8 @@ end;
 
 method GooglePushProviderService.unregisterDevice(registrationId: System.String);
 begin
-  if (PushManager.DeviceManager.RemoveDevice(registrationId)) then begin
+  if (PushManager.RemoveDevice(registrationId)) then
     PushManager.Save;
-    PushManager.DeviceUnregistered(self, new DeviceEventArgs(DeviceToken := registrationId, Mode := DeviceEventArgs.EventMode.Unregistered));
-  end;
 end;
 
 end.
