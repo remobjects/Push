@@ -126,21 +126,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplePushProviderService_Impl.pas">
-      <Subtype>Component</Subtype>
+    <Compile Include="Connects\APSConnect.pas" />
+    <Compile Include="Connects\GCMConnect.pas" />
+    <Compile Include="Connects\GenericPushConnect.pas" />
+    <Compile Include="Connects\IPushConnect.pas" />
+    <Compile Include="DeviceManagers\FileDeviceManager.pas" />
+    <Compile Include="DeviceManagers\IDeviceManager.pas" />
+    <Compile Include="DeviceManagers\InMemoryDeviceManager.pas" />
+    <Compile Include="PushDeviceInfo.pas" />
+    <Compile Include="Properties\AssemblyInfo.pas" />
+    <Compile Include="Services\ApplePushProviderService_Impl.pas">
+      <SubType>Component</SubType>
       <DesignableClassName>RemObjects.SDK.Push.ApplePushProviderService</DesignableClassName>
-      <DisableDesigner>True</DisableDesigner>
     </Compile>
-    <Compile Include="APSConnect.pas" />
-    <Compile Include="DeviceManager.pas" />
-    <Compile Include="GCMConnect.pas" />
-    <Compile Include="GenericPushConnect.pas" />
-    <Compile Include="GooglePushProviderService_Impl.pas">
+    <Compile Include="Services\GooglePushProviderService_Impl.pas">
       <SubType>Component</SubType>
       <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
-      <DisableDesigner>True</DisableDesigner>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.pas" />
+    <Compile Include="Services\PushProvider_Intf.pas" />
+    <Compile Include="Services\PushProvider_Invk.pas" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
@@ -151,10 +155,11 @@
     <Compile Include="Properties\Settings.Designer.pas" />
     <Compile Include="PushManager.pas" />
     <EmbeddedResource Include="PushProvider.RODL" />
-    <Compile Include="PushProvider_Intf.pas" />
-    <Compile Include="PushProvider_Invk.pas" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Connects" />
+    <Folder Include="DeviceManagers" />
+    <Folder Include="Services" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ProjectExtensions>

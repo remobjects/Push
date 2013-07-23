@@ -17,30 +17,8 @@ uses
   RemObjects.SDK.Types;
 
 type
-  IDeviceManager = public interface
-    method AddDevice(anId: String; aDevice: PushDeviceInfo);
-    method RemoveDevice(anId: String): Boolean;
-    method TryGetDevice(anId: String; out aDevice: PushDeviceInfo): Boolean;
-    property Devices: sequence of PushDeviceInfo read;
-  end;
-
-  IDeviceStorage = public interface
-    method Load();
-    method Save();
-  end;
-
-  InMemoryDeviceManager = public class (IDeviceManager)
-  protected
-    fDevices: Dictionary<String, PushDeviceInfo> := new Dictionary<String, PushDeviceInfo>();
-  public
-    property Devices: sequence of PushDeviceInfo read fDevices.Values;
-
-    method AddDevice(anId: String; aDevice: PushDeviceInfo); virtual;
-    method RemoveDevice(anId: String): Boolean; virtual;
-    method TryGetDevice(anId: String; out aDevice: PushDeviceInfo): Boolean;
-  end;
-
-  FileDeviceManager = public class (InMemoryDeviceManager, IDeviceManager, IDeviceStorage)
+ 
+  FileDeviceManager = public class (InMemoryDeviceManager, IDeviceManager)
   private
     fFilename: String; 
     method set_Filename(value: String);
@@ -49,8 +27,8 @@ type
     property DeviceStoreFile: String read fFilename write set_Filename;
     property AutoSave: Boolean := true;
 
-    method Load;
-    method Save;
+    method Load; override;
+    method Save; override;
     method AddDevice(anId: String; aDevice: PushDeviceInfo); override;
     method RemoveDevice(anId: String): Boolean; override;
     constructor; empty;
@@ -58,21 +36,6 @@ type
   end;
 
 implementation
-
-method InMemoryDeviceManager.AddDevice(anId: String; aDevice: PushDeviceInfo);
-begin
-  fDevices.Add(anId, aDevice);
-end;
-
-method InMemoryDeviceManager.RemoveDevice(anId: String): Boolean;
-begin
-  exit (fDevices.Remove(anId));
-end;
-
-method InMemoryDeviceManager.TryGetDevice(anId: String; out aDevice: PushDeviceInfo): Boolean;
-begin
-  exit  (fDevices.TryGetValue(anId, out aDevice));
-end;
 
 method FileDeviceManager.Save;
 begin

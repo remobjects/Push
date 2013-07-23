@@ -8,7 +8,7 @@ uses
   System.Text;
 
 type
-  GenericPushConnect = public class
+  GenericPushConnect = public class(IPushConnect)
   private
     class var fInstance: GenericPushConnect;
     class method get_Instance: GenericPushConnect;
@@ -16,6 +16,7 @@ type
     method sendGcmMessage(aMessage: GCMMessage);
   protected
   public
+    property &Type: String read "Generic";
     property APSConnect: APSConnect := new APSConnect; readonly;
     property GCMConnect: GCMConnect := new GCMConnect; readonly;
 

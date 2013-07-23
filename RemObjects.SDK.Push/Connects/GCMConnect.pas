@@ -11,6 +11,22 @@ uses
   RemObjects.SDK;
 
 type
+
+  GCMConnect = public class (IPushConnect)
+  private
+    const GCM_SEND_URL: String = 'https://android.googleapis.com/gcm/send';
+
+    method PreparePushRequestBody(aMessage: GCMMessage): String;
+    method ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: GCMMessage; out aResponse: GCMResponse);
+  protected
+  public
+    property &Type: String read "GCM";
+    property ApiKey: String;
+    method PushMessage(aMessage: GCMMessage);
+    method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
+    constructor; empty;
+  end;
+
   GCMMessage = public class
   public   
     const DEFAULT_TIME_TO_LIVE: Integer = 3600 * 24 * 4; //4 weeks, in seconds
@@ -65,22 +81,6 @@ type
   GCMServerException = public class(Exception)
   public
     property Response: GCMResponse read assembly write;
-  end;
-
-  GCMConnect = public class
-  private
-    const GCM_SEND_URL: String = 'https://android.googleapis.com/gcm/send';
-
-    method PreparePushRequestBody(aMessage: GCMMessage): String;
-    method ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: GCMMessage; out aResponse: GCMResponse);
-  protected
-  public
-    property ApiKey: String;
-    method PushMessage(aMessage: GCMMessage);
-    method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
-
-    constructor; empty;
-
   end;
 
 implementation

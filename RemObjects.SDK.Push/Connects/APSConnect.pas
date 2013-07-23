@@ -15,7 +15,7 @@ uses
   RemObjects.SDK.Types;
 
 type
-  APSConnect = public class(IDisposable)
+  APSConnect = public class(IDisposable, IPushConnect)
   private
     {$IFDEF MONO}
     fSslStream: Mono.Security.Protocol.Tls.SslClientStream;
@@ -34,6 +34,7 @@ type
   public
     method Dispose;
 
+    property &Type: String read "APS";
     // Filename for Certificate .p12
     property MacCertificateFile: String write set_MacCertificateFile;
     property iOSCertificateFile: String write set_iOSCertificateFile;
