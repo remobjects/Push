@@ -127,12 +127,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Connects\APSConnect.pas" />
+    <Compile Include="Connects\Extensions.pas" />
     <Compile Include="Connects\GCMConnect.pas" />
     <Compile Include="Connects\GenericPushConnect.pas" />
     <Compile Include="Connects\IPushConnect.pas" />
     <Compile Include="DeviceManagers\FileDeviceManager.pas" />
     <Compile Include="DeviceManagers\IDeviceManager.pas" />
     <Compile Include="DeviceManagers\InMemoryDeviceManager.pas" />
+    <Compile Include="Events.pas" />
     <Compile Include="PushDeviceInfo.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Compile Include="Services\ApplePushProviderService_Impl.pas">

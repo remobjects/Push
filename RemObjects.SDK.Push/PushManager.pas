@@ -37,6 +37,11 @@ type
 
     event DeviceRegistered: DeviceEvent assembly raise;
     event DeviceUnregistered: DeviceEvent assembly raise;
+
+    method PushMessage(aMessage: String; aBadge: nullable Int32 := nil; aSound: String := nil);
+    method PushBadge(aBadge: nullable Int32);
+    method PushSound(aSound: String);
+
   end;
 
   DeviceEvent = public delegate(sender: Object; ea: DeviceEventArgs);
@@ -87,5 +92,25 @@ begin
   aDevice.LastSeen := DateTime.Now;
   DeviceRegistered(DeviceManager, new DeviceEventArgs(DeviceToken := aDevice.ID, Mode := DeviceEventArgs.EventMode.EntryUpdated));
 end;
+
+class method PushManager.PushMessage(aMessage: String; aBadge: nullable Int32; aSound: String);
+begin
+  for each device in fDeviceManager.Devices do
+    PushConnect.PushMessage(device, aMessage, aBadge, aSound);
+end;
+
+class method PushManager.PushBadge(aBadge: nullable Int32);
+begin
+  for each device in fDeviceManager.Devices do
+    PushConnect.PushBadge(device, aBadge);
+end;
+
+class method PushManager.PushSound(aSound: String);
+begin
+  for each device in fDeviceManager.Devices do
+    PushConnect.PushSound(device, aSound);
+end;
+
+
 
 end.

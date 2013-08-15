@@ -22,8 +22,13 @@ type
   public
     property &Type: String read "GCM";
     property ApiKey: String;
-    method PushMessage(aMessage: GCMMessage);
+    method PushMessage(aMessage: GCMMessage): GCMResponse;
     method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
+
+    event OnPushSent: MessageSentDelegate protected raise;
+    event OnPushFailed: MessageFailedDelegate protected raise;
+    event OnConnectException: PushExceptionDelegate protected raise;
+    event OnDeviceExpired: DeviceExpiredDelegate protected raise;
     constructor; empty;
   end;
 
@@ -76,7 +81,7 @@ type
     InvalidPackageName  // package name of regId app doesn't match restricted_package_name from the request
   );
 
-  GCMServerResponseStatus = public enum (OK, MalformedJson, AuthenticationFailed, ProcessingErrors , ServerInternalError);
+  GCMServerResponseStatus = public enum (OK, MalformedJson, AuthenticationFailed, CanonicalId, ProcessingErrors, ServerInternalError);
 
   GCMServerException = public class(Exception)
   public
@@ -86,18 +91,18 @@ type
 implementation
 
 // on error: should raise GCMException
-method GCMConnect.PushMessage(aMessage: GCMMessage);
+method GCMConnect.PushMessage(aMessage: GCMMessage): GCMResponse;
 begin
   var lResponse: GCMResponse;
   if (not self.TryPushMessage(aMessage, out lResponse)) then begin
     raise new GCMServerException('Error during GCM push notification', Response := lResponse);
   end;
+  exit (lResponse);
 end;
 
 // on error: should return false, and out GmcResponse with error filled 
 method GCMConnect.TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
 begin
-
   var lWebRequest := HttpWebRequest(WebRequest.Create(GCM_SEND_URL));
   lWebRequest.Method := 'POST';
   lWebRequest.ContentType := 'application/json';
@@ -259,6 +264,30 @@ begin
         end;
       end;        
     end;
+  end;
+
+  // send events
+  for each res in aResponse.Results index idx do begin
+
+    var lSingleMessage := iif(aMessage.RegistrationIds.Count > 0, aMessage.GetSingleMessage(idx), aMessage);
+
+    if (res.Status = GCMResponse.ResponseResultStatus.Ok) then
+      self.OnPushSent(self, lSingleMessage)
+    else if (res.Status = GCMResponse.ResponseResultStatus.NewRegistrationId) then begin
+      var lNew := res.NewRegistrationId;
+      var lOld := String.Empty;
+      if (lSingleMessage.RegistrationIds:Count > 0) then
+        lOld := lSingleMessage.RegistrationIds[0];
+
+      self.OnDeviceExpired(self, lOld, lNew);
+    end
+    else if (res.Status = GCMResponse.ResponseResultStatus.Unavailable) then begin
+      self.OnPushFailed(self, lSingleMessage, new Exception('GCM was busy or unawailable'));
+    end
+    else if (res.Status = GCMResponse.ResponseResultStatus.NotRegistered) then begin
+      self.OnDeviceExpired(self, lSingleMessage.RegistrationIds:First(), nil);
+    end
+
   end;
 end;
 
