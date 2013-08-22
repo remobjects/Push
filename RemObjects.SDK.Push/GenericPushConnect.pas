@@ -25,6 +25,7 @@ type
 
     method PushMessageAndBadgeNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
     method PushMessageBadgeAndSoundNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
+    method PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
 
     class property Instance: GenericPushConnect read get_Instance;
 
@@ -86,6 +87,22 @@ begin
       lMessage.RegistrationIds.Add(gDevice.RegistrationID);
       lMessage.Data.Add("message", aMessage);
       lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
+      self.sendGcmMessage(lMessage);
+    end;
+  end;
+end;
+
+method GenericPushConnect.PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
+begin
+  case aDevice type of
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), nil, 1); // send 0 to clear the Badge, on APS
+    GooglePushDeviceInfo: begin
+      var gDevice := aDevice as GooglePushDeviceInfo;
+      var lMessage := new GCMMessage();
+      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
+      lMessage.Data.Add("message", aMessage);
+      lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
+      // todo: ContentAvailable?
       self.sendGcmMessage(lMessage);
     end;
   end;

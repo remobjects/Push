@@ -127,18 +127,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplePushProviderService_Impl.pas">
-      <Subtype>Component</Subtype>
-      <DesignableClassName>RemObjects.SDK.Push.ApplePushProviderService</DesignableClassName>
       <DisableDesigner>True</DisableDesigner>
+      <SubType>Component</SubType>
+      <DesignableClassName>RemObjects.SDK.Push.ApplePushProviderService</DesignableClassName>
     </Compile>
     <Compile Include="APSConnect.pas" />
     <Compile Include="DeviceManager.pas" />
     <Compile Include="GCMConnect.pas" />
     <Compile Include="GenericPushConnect.pas" />
     <Compile Include="GooglePushProviderService_Impl.pas">
+      <DisableDesigner>True</DisableDesigner>
       <SubType>Component</SubType>
       <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
-      <DisableDesigner>True</DisableDesigner>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.pas" />
     <EmbeddedResource Include="Properties\Resources.resx">

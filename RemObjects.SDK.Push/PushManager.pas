@@ -88,8 +88,6 @@ type
 implementation
 
 method PushManager.Save;
-require
-  assigned(fDeviceManager);
 begin
   if assigned(fDeviceManager) and (fDeviceManager is IDeviceStorage) then
     IDeviceStorage(fDeviceManager).Save();
@@ -100,7 +98,7 @@ require
   assigned(aDeviceManager);
 begin
   if (fDeviceManager ≠ aDeviceManager) then begin
-    Save();
+    if assigned(fDeviceManager) then Save();
     fDeviceManager := aDeviceManager;
   end;
 end;
