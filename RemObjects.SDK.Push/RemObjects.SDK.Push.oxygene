@@ -135,6 +135,13 @@
     <Compile Include="DeviceManagers\IDeviceManager.pas" />
     <Compile Include="DeviceManagers\InMemoryDeviceManager.pas" />
     <Compile Include="Events.pas" />
+    <Compile Include="MPNS\MPNSConnect.pas" />
+    <Compile Include="MPNS\MPNSMessages.pas" />
+    <Compile Include="MPNS\MPNSResponse.pas" />
+    <Compile Include="MPNS\WindowsPhonePushProviderService_Impl.pas">
+      <SubType>Component</SubType>
+      <DesignableClassName>RemObjects.SDK.Push.WindowsPhonePushProviderService</DesignableClassName>
+    </Compile>
     <Compile Include="PushDeviceInfo.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
     <Compile Include="Services\ApplePushProviderService_Impl.pas">
@@ -161,6 +168,7 @@
   <ItemGroup>
     <Folder Include="Connects" />
     <Folder Include="DeviceManagers" />
+    <Folder Include="MPNS" />
     <Folder Include="Services" />
     <Folder Include="Properties\" />
   </ItemGroup>

@@ -5,7 +5,8 @@ interface
 uses
   System.Collections.Generic,
   System.Linq,
-  System.Text;
+  System.Text,
+  RemObjects.SDK.Push.MPNS;
 
 type
   GenericPushConnect = public class(IPushConnect)
@@ -36,6 +37,7 @@ type
     property &Type: String read "Generic";
     property APSConnect: APSConnect := new APSConnect; readonly;
     property GCMConnect: GCMConnect := new GCMConnect; readonly;
+    property MPNSConnect: MPNSConnect := new MPNSConnect; readonly;
 
 
     
@@ -151,6 +153,7 @@ method GenericPushConnect.getConnects: sequence of IPushConnect;
 begin
   yield self.GCMConnect;
   yield self.APSConnect;
+  yield self.MPNSConnect;
 end;
 
 method GenericPushConnect.addOnPushSent(param: MessageSentDelegate);

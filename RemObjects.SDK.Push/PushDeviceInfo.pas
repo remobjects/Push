@@ -44,6 +44,7 @@ type
   public
     property &Type: String read 'MPNS'; override;
     property ID: String read DeviceID; override;
+    property NotificationURI: String;
     property DeviceID: String;
     property OSVersion: String;
   end;

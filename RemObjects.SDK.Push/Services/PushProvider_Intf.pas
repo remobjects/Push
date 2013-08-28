@@ -33,7 +33,11 @@ type
     method registerDevice(registrationId: System.String; additionalInfo: System.String);
     method unregisterDevice(registrationId: System.String);
   end;
-
+  
+  IWindowsPhonePushProviderService = public interface(RemObjects.SDK.IROService)
+    method registerDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String);
+    method unregisterDevice(deviceId: System.String);
+  end;
   
   IApplePushProviderService_Async = public interface(RemObjects.SDK.IROService_Async)
     method BeginregisterDevice(deviceToken: RemObjects.SDK.Types.Binary; additionalInfo: System.String; __Callback: System.AsyncCallback; __UserData: System.Object): System.IAsyncResult;
@@ -42,8 +46,6 @@ type
     method EndunregisterDevice(__AsyncResult: System.IAsyncResult);
   end;
   
-  
-  
   IGooglePushProviderService_Async = public interface(RemObjects.SDK.IROService_Async)
     method BeginregisterDevice(registrationId: System.String; additionalInfo: System.String; __Callback: System.AsyncCallback; __UserData: System.Object): System.IAsyncResult;
     method EndregisterDevice(__AsyncResult: System.IAsyncResult);
@@ -51,7 +53,12 @@ type
     method EndunregisterDevice(__AsyncResult: System.IAsyncResult);
   end;
   
-  
+  IWindowsPhonePushProviderService_Async = public interface(RemObjects.SDK.IROService_Async)
+    method BeginregisterDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String; __Callback: System.AsyncCallback; __UserData: System.Object): System.IAsyncResult;
+    method EndregisterDevice(__AsyncResult: System.IAsyncResult);
+    method BeginunregisterDevice(deviceId: System.String; __Callback: System.AsyncCallback; __UserData: System.Object): System.IAsyncResult;
+    method EndunregisterDevice(__AsyncResult: System.IAsyncResult);
+  end;  
   
 implementation
 

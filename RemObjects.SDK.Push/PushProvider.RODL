@@ -1,55 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Library Name="PushProvider" UID="{EBA4557B-CD8A-4434-B34F-1954640CE0A0}" Version="3.0">
-  <Services>
-    <Service Name="ApplePushProviderService" UID="{96E2AB4D-5DE2-4D20-8F8D-843F5BEBA3A2}">
-      <Interfaces>
-        <Interface Name="Default" UID="{E066DCE2-1A6F-408B-8F14-873E53A1B824}">
-          <Operations>
-            <Operation Name="registerDevice" UID="{5D73E4D6-428D-4B06-BFE0-BBBA67058E2D}">
-              <Parameters>
-                <Parameter Name="deviceToken" DataType="Binary" Flag="In" >
-                </Parameter>
-                <Parameter Name="additionalInfo" DataType="Utf8String" Flag="In" >
-                </Parameter>
-              </Parameters>
-            </Operation>
-            <Operation Name="unregisterDevice" UID="{EC8FB3A1-FD84-4F83-A54F-0B0904DBDDC9}">
-              <Parameters>
-                <Parameter Name="deviceToken" DataType="Binary" Flag="In" >
-                </Parameter>
-              </Parameters>
-            </Operation>
-          </Operations>
-        </Interface>
-      </Interfaces>
-    </Service>
-    <Service Name="GooglePushProviderService" UID="{7536D037-1502-41C9-9B7C-61519127A9A8}">
-      <Interfaces>
-        <Interface Name="Default" UID="{33BC7B12-E712-4052-A5DE-FFF96DAEE687}">
-          <Operations>
-            <Operation Name="registerDevice" UID="{4A9B0F3E-1151-4C7D-A46D-BE9F7511892F}">
-              <Parameters>
-                <Parameter Name="registrationId" DataType="AnsiString" Flag="In" >
-                </Parameter>
-                <Parameter Name="additionalInfo" DataType="AnsiString" Flag="In" >
-                </Parameter>
-              </Parameters>
-            </Operation>
-            <Operation Name="unregisterDevice" UID="{1FE49927-885D-4439-80F6-679213F7B7B2}">
-              <Parameters>
-                <Parameter Name="registrationId" DataType="AnsiString" Flag="In" >
-                </Parameter>
-              </Parameters>
-            </Operation>
-          </Operations>
-        </Interface>
-      </Interfaces>
-    </Service>
-  </Services>
-  <Structs>
-  </Structs>
-  <Enums>
-  </Enums>
-  <Arrays>
-  </Arrays>
+<Services>
+<Service Name="ApplePushProviderService" UID="{96E2AB4D-5DE2-4D20-8F8D-843F5BEBA3A2}">
+<Interfaces>
+<Interface Name="Default" UID="{E066DCE2-1A6F-408B-8F14-873E53A1B824}">
+<Operations>
+<Operation Name="registerDevice" UID="{5D73E4D6-428D-4B06-BFE0-BBBA67058E2D}">
+<Parameters>
+<Parameter Name="deviceToken" DataType="Binary" Flag="In" >
+</Parameter>
+<Parameter Name="additionalInfo" DataType="Utf8String" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+<Operation Name="unregisterDevice" UID="{EC8FB3A1-FD84-4F83-A54F-0B0904DBDDC9}">
+<Parameters>
+<Parameter Name="deviceToken" DataType="Binary" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+</Operations>
+</Interface>
+</Interfaces>
+</Service>
+<Service Name="GooglePushProviderService" UID="{7536D037-1502-41C9-9B7C-61519127A9A8}">
+<Interfaces>
+<Interface Name="Default" UID="{33BC7B12-E712-4052-A5DE-FFF96DAEE687}">
+<Operations>
+<Operation Name="registerDevice" UID="{4A9B0F3E-1151-4C7D-A46D-BE9F7511892F}">
+<Parameters>
+<Parameter Name="registrationId" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="additionalInfo" DataType="AnsiString" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+<Operation Name="unregisterDevice" UID="{1FE49927-885D-4439-80F6-679213F7B7B2}">
+<Parameters>
+<Parameter Name="registrationId" DataType="AnsiString" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+</Operations>
+</Interface>
+</Interfaces>
+</Service>
+<Service Name="WindowsPhonePushProviderService" UID="{205C3056-0A72-4868-89FF-78BD00AAB10F}">
+<Interfaces>
+<Interface Name="Default" UID="{55FC00D8-4FBC-442E-88D1-D70152B205C7}">
+<Operations>
+<Operation Name="registerDevice" UID="{2839AFA2-E710-46EF-B8FA-32304E770CB1}">
+<Documentation><![CDATA[It's up to user to make deviceId unique and persist it. He can choose wheter to use vendorId from DeviceExtendedProperties.GetValue("DeviceUniqueId") or generate some GUID, store it in IsolatedStorage and retrieve it each time the notification started.
+All this method expects is that deviceId won't be changed for the app (while Push Notification URL can be changed by the MPNS).]]></Documentation>
+<Parameters>
+<Parameter Name="deviceId" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="pushNotificationURI" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="osVersion" DataType="AnsiString" Flag="In" >
+</Parameter>
+<Parameter Name="additionalInfo" DataType="AnsiString" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+<Operation Name="unregisterDevice" UID="{790FF8A2-2897-4771-A345-6E5861A18340}">
+<Parameters>
+<Parameter Name="deviceId" DataType="AnsiString" Flag="In" >
+</Parameter>
+</Parameters>
+</Operation>
+</Operations>
+</Interface>
+</Interfaces>
+</Service>
+</Services>
+<Structs>
+</Structs>
+<Enums>
+</Enums>
+<Arrays>
+</Arrays>
 </Library>
