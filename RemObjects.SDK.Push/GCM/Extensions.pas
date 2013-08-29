@@ -1,9 +1,10 @@
-﻿namespace RemObjects.SDK.Push;
+﻿namespace RemObjects.SDK.Push.GCM;
 
 interface
 
 uses
-  System.Runtime.CompilerServices;
+  System.Runtime.CompilerServices,
+  RemObjects.SDK.Push;
 
 type
   [&Extension]

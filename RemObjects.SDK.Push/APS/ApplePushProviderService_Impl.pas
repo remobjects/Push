@@ -82,7 +82,7 @@ begin
                                        ServerInfo := nil,
                                        LastSeen := DateTime.Now);
 
-      PushManager.AddDevice(lStringToken, lDevice);
+      PushManager.AddDevice(lDevice);
       PushManager.Save;
     end;
   except

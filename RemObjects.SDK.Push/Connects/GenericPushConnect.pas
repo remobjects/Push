@@ -6,7 +6,8 @@ uses
   System.Collections.Generic,
   System.Linq,
   System.Text,
-  RemObjects.SDK.Push.MPNS;
+  RemObjects.SDK.Push.MPNS,
+  RemObjects.SDK.Push.GCM;
 
 type
   GenericPushConnect = public class(IPushConnect)

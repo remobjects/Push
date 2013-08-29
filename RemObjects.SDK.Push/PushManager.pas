@@ -23,7 +23,7 @@ type
     fDeviceManager: IDeviceManager;
     method Set_DeviceManager(aDeviceManager: IDeviceManager);
   assembly
-    method AddDevice(anId: String; aDevice: PushDeviceInfo);
+    method AddDevice(aDevice: PushDeviceInfo);
     method RemoveDevice(anId: String): Boolean;
     method UpdateDevice(aDevice: PushDeviceInfo; anAdditionalClientInfo: String);
   public
@@ -73,10 +73,10 @@ begin
   end;
 end;
 
-class method PushManager.AddDevice(anId: String; aDevice: PushDeviceInfo);
+class method PushManager.AddDevice(aDevice: PushDeviceInfo);
 begin
-  DeviceManager.AddDevice(anId, aDevice);
-  DeviceRegistered(DeviceManager, new DeviceEventArgs(DeviceToken := anId, Mode := DeviceEventArgs.EventMode.Registered));
+  DeviceManager.AddDevice(aDevice.ID, aDevice);
+  DeviceRegistered(DeviceManager, new DeviceEventArgs(DeviceToken := aDevice.ID, Mode := DeviceEventArgs.EventMode.Registered));
 end;
 
 class method PushManager.RemoveDevice(anId: String): Boolean;

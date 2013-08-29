@@ -126,15 +126,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Connects\APSConnect.pas" />
-    <Compile Include="Connects\Extensions.pas" />
-    <Compile Include="Connects\GCMConnect.pas" />
+    <Compile Include="APS\ApplePushProviderService_Impl.pas">
+      <SubType>Component</SubType>
+      <DesignableClassName>RemObjects.SDK.Push.ApplePushProviderService</DesignableClassName>
+    </Compile>
+    <Compile Include="APS\APSConnect.pas" />
     <Compile Include="Connects\GenericPushConnect.pas" />
     <Compile Include="Connects\IPushConnect.pas" />
     <Compile Include="DeviceManagers\FileDeviceManager.pas" />
     <Compile Include="DeviceManagers\IDeviceManager.pas" />
     <Compile Include="DeviceManagers\InMemoryDeviceManager.pas" />
     <Compile Include="Events.pas" />
+    <Compile Include="GCM\Extensions.pas" />
+    <Compile Include="GCM\GCMConnect.pas" />
+    <Compile Include="GCM\GCMMessage.pas" />
+    <Compile Include="GCM\GooglePushProviderService_Impl.pas">
+      <SubType>Component</SubType>
+      <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
+    </Compile>
+    <Compile Include="GCM\GCMResponse.pas" />
     <Compile Include="MPNS\MPNSConnect.pas" />
     <Compile Include="MPNS\MPNSMessages.pas" />
     <Compile Include="MPNS\MPNSResponse.pas" />
@@ -144,14 +154,6 @@
     </Compile>
     <Compile Include="PushDeviceInfo.pas" />
     <Compile Include="Properties\AssemblyInfo.pas" />
-    <Compile Include="Services\ApplePushProviderService_Impl.pas">
-      <SubType>Component</SubType>
-      <DesignableClassName>RemObjects.SDK.Push.ApplePushProviderService</DesignableClassName>
-    </Compile>
-    <Compile Include="Services\GooglePushProviderService_Impl.pas">
-      <SubType>Component</SubType>
-      <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
-    </Compile>
     <Compile Include="Services\PushProvider_Intf.pas" />
     <Compile Include="Services\PushProvider_Invk.pas" />
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -169,6 +171,8 @@
     <Folder Include="Connects" />
     <Folder Include="DeviceManagers" />
     <Folder Include="MPNS" />
+    <Folder Include="GCM" />
+    <Folder Include="APS" />
     <Folder Include="Services" />
     <Folder Include="Properties\" />
   </ItemGroup>

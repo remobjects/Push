@@ -89,7 +89,7 @@ begin
                                        ClientInfo := additionalInfo, 
                                        ServerInfo := nil,
                                        LastSeen := DateTime.Now);
-      PushManager.AddDevice(registrationId, p);      
+      PushManager.AddDevice(p);
       PushManager.Save;
     end;
   except

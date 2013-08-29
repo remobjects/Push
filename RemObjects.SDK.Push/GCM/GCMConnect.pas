@@ -1,4 +1,4 @@
-﻿namespace RemObjects.SDK.Push;
+﻿namespace RemObjects.SDK.Push.GCM;
 
 interface
 
@@ -8,7 +8,8 @@ uses
   System.Linq,
   System.Net,
   System.Text,
-  RemObjects.SDK;
+  RemObjects.SDK,
+  RemObjects.SDK.Push;
 
 type
 
@@ -18,6 +19,7 @@ type
 
     method PreparePushRequestBody(aMessage: GCMMessage): String;
     method ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: GCMMessage; out aResponse: GCMResponse);
+    method ProcessResponse(aResponse: GCMResponse);
   protected
   public
     property &Type: String read "GCM";
@@ -31,57 +33,6 @@ type
     event OnDeviceExpired: DeviceExpiredDelegate protected raise;
     constructor; empty;
   end;
-
-  GCMMessage = public class
-  public   
-    const DEFAULT_TIME_TO_LIVE: Integer = 3600 * 24 * 4; //4 weeks, in seconds
-  public
-    property RegistrationIds: List<String> := new List<String>;
-    property CollapseKey: String read write;
-    property Data: Dictionary<String, String> := new Dictionary<String,String>();
-    property DelayWhileIdle: Boolean := false;
-    property TimeToLeave: Integer := DEFAULT_TIME_TO_LIVE;
-    property RestrictedPackageName: String;
-    property DryRun: Boolean := false;
-  end;
-
-  GCMResponse = public class
-  assembly
-    property MulticastId: Integer := 0;
-  public
-    property SuccessesCount: Integer := 0;
-    property FailuresCount: Integer := 0;
-    property CanonicalIdCount: Integer := 0;
-    property Results: List<ResponseResult> := new List<ResponseResult>();    
-    property Status: GCMServerResponseStatus;
-  end;
-
-  ResponseResult nested in GCMResponse = public class
-    assembly MessageId: String;
-    property RegisteredId: String; // get it from request
-    property NewRegistrationId: String;
-    property Status: ResponseResultStatus := ResponseResultStatus.Ok;
-
-
-  end;
-
-  ResponseResultStatus nested in GCMResponse = public enum (
-    Undefined,
-    Ok,
-    NewRegistrationId, // new canonical registration Id was provided - update your db record
-    Unavailable, // GCM were busy/internal timeout, retry is honoured (Retry-After header)
-    NotRegistered, // remove regId from DB
-    MissingRegistration, // regId is not present in request
-    InvalidRegistration, // regId is invalid/malformed
-    MismatchSenderId, // app with this regID is supposed to get pushes from other SenderID.
-    MessageTooBig, // payload is more then 4kb
-    InvalidDataKey, // invalid key payload data
-    InvalidTtl, // ttl should be in 0..2,419,200(4 weeks)
-    InternalServerError, // (Status=500) - retry honoured
-    InvalidPackageName  // package name of regId app doesn't match restricted_package_name from the request
-  );
-
-  GCMServerResponseStatus = public enum (OK, MalformedJson, AuthenticationFailed, CanonicalId, ProcessingErrors, ServerInternalError);
 
   GCMServerException = public class(Exception)
   public
@@ -127,7 +78,8 @@ begin
   finally
     lResponse:Close();
   end;
-  exit (aResponse:Status = GCMServerResponseStatus.OK);
+  ProcessResponse(aResponse);
+  exit (aResponse:Status = GCMResponse.ResponseStatus.OK);
 end;
 
 method GCMConnect.PreparePushRequestBody(aMessage: GCMMessage): String;
@@ -195,19 +147,19 @@ begin
   //                                          GCM service disabled|server not whitelisted)
   // http code = 400 - malformed JSON
 
-  aResponse := new RemObjects.SDK.Push.GCMResponse(Status := RemObjects.SDK.Push.GCMServerResponseStatus.OK);
+  aResponse := new GCMResponse(aMessage, Status := GCMResponse.ResponseStatus.OK);
 
   case (Integer(aWebResponse.StatusCode)) of
     400:  begin
-      aResponse.Status := RemObjects.SDK.Push.GCMServerResponseStatus.MalformedJson;
+      aResponse.Status := GCMResponse.ResponseStatus.MalformedJson;
       exit;
     end;
     401:  begin
-      aResponse.Status := RemObjects.SDK.Push.GCMServerResponseStatus.AuthenticationFailed;
+      aResponse.Status := GCMResponse.ResponseStatus.AuthenticationFailed;
       exit;
     end;
     500..599: begin
-      aResponse.Status := RemObjects.SDK.Push.GCMServerResponseStatus.ServerInternalError;
+      aResponse.Status := GCMResponse.ResponseStatus.ServerInternalError;
       exit;
     end;
   end;
@@ -227,21 +179,21 @@ begin
   var lResults := JsonSerializer.GetJsonNodeByKey<JsonArray>(lRespObject, 'results');
   
   if (assigned(lResults) and (lResults.Count > 0)) then begin
-    aResponse.Status := GCMServerResponseStatus.ProcessingErrors; // there were some errors during procesing of regIds
+    aResponse.Status := GCMResponse.ResponseStatus.ProcessingErrors; // there were some errors during procesing of regIds
     for idx: Integer := 0 to lResults.Count - 1 do begin
       var lJsonRes := lResults[idx];
-      var lGcmRes := new GCMResponse.ResponseResult();
+      var lGcmRes := new GCMMessageResult();
       lGcmRes.RegisteredId := aMessage.RegistrationIds[idx];
       aResponse.Results.Add(lGcmRes);
 
       lGcmRes.MessageId := JsonSerializer.GetJsonNodeByKey<JsonString>(lJsonRes, 'message_id'):Value;
 
       if (not String.IsNullOrEmpty(lGcmRes.MessageId)) then begin
-        lGcmRes.Status := GCMResponse.ResponseResultStatus.Ok;
+        lGcmRes.Status := GCMMessageResult.ResultStatus.Ok;
         lGcmRes.NewRegistrationId := JsonSerializer.GetJsonNodeByKey<JsonString>(lJsonRes, 'registration_id'):Value;
 
         if (not String.IsNullOrEmpty(lGcmRes.NewRegistrationId)) then begin
-          lGcmRes.Status := GCMResponse.ResponseResultStatus.NewRegistrationId;
+          lGcmRes.Status := GCMMessageResult.ResultStatus.NewRegistrationId;
           continue;
         end;
       end
@@ -249,31 +201,34 @@ begin
         var lError := JsonSerializer.GetJsonNodeByKey<JsonString>(lJsonRes, 'error'):Value;
         if (not String.IsNullOrEmpty(lError)) then begin
           case lError.Trim().ToLower() of 
-            'missingregistration':    lGcmRes.Status := GCMResponse.ResponseResultStatus.MissingRegistration;
-            'unavailable':            lGcmRes.Status := GCMResponse.ResponseResultStatus.Unavailable;
-            'notregistered':          lGcmRes.Status := GCMResponse.ResponseResultStatus.NotRegistered;
-            'invalidregistration':    lGcmRes.Status := GCMResponse.ResponseResultStatus.InvalidRegistration;
-            'mismatchsenderid':       lGcmRes.Status := GCMResponse.ResponseResultStatus.MismatchSenderId;
-            'messagetoobig':          lGcmRes.Status := GCMResponse.ResponseResultStatus.MessageTooBig;
-            'invaliddatakey':         lGcmRes.Status := GCMResponse.ResponseResultStatus.InvalidDataKey;
-            'invalidttl':             lGcmRes.Status := GCMResponse.ResponseResultStatus.InvalidTtl;
-            'internalservererror':    lGcmRes.Status := GCMResponse.ResponseResultStatus.InternalServerError;
+            'missingregistration':    lGcmRes.Status := GCMMessageResult.ResultStatus.MissingRegistration;
+            'unavailable':            lGcmRes.Status := GCMMessageResult.ResultStatus.Unavailable;
+            'notregistered':          lGcmRes.Status := GCMMessageResult.ResultStatus.NotRegistered;
+            'invalidregistration':    lGcmRes.Status := GCMMessageResult.ResultStatus.InvalidRegistration;
+            'mismatchsenderid':       lGcmRes.Status := GCMMessageResult.ResultStatus.MismatchSenderId;
+            'messagetoobig':          lGcmRes.Status := GCMMessageResult.ResultStatus.MessageTooBig;
+            'invaliddatakey':         lGcmRes.Status := GCMMessageResult.ResultStatus.InvalidDataKey;
+            'invalidttl':             lGcmRes.Status := GCMMessageResult.ResultStatus.InvalidTtl;
+            'internalservererror':    lGcmRes.Status := GCMMessageResult.ResultStatus.InternalServerError;
             else
-              lGcmRes.Status := GCMResponse.ResponseResultStatus.Undefined;
+              lGcmRes.Status := GCMMessageResult.ResultStatus.Undefined;
           end;
         end;
       end;        
     end;
-  end;
+  end;  
+end;
 
+method GCMConnect.ProcessResponse(aResponse: GCMResponse);
+begin
   // send events
   for each res in aResponse.Results index idx do begin
+    var lMessage := aResponse.Message;
+    var lSingleMessage := iif(lMessage.RegistrationIds.Count > 0, lMessage.GetSingleMessage(idx), lMessage);
 
-    var lSingleMessage := iif(aMessage.RegistrationIds.Count > 0, aMessage.GetSingleMessage(idx), aMessage);
-
-    if (res.Status = GCMResponse.ResponseResultStatus.Ok) then
+    if (res.Status = GCMMessageResult.ResultStatus.Ok) then
       self.OnPushSent(self, lSingleMessage)
-    else if (res.Status = GCMResponse.ResponseResultStatus.NewRegistrationId) then begin
+    else if (res.Status = GCMMessageResult.ResultStatus.NewRegistrationId) then begin
       var lNew := res.NewRegistrationId;
       var lOld := String.Empty;
       if (lSingleMessage.RegistrationIds:Count > 0) then
@@ -281,14 +236,14 @@ begin
 
       self.OnDeviceExpired(self, lOld, lNew);
     end
-    else if (res.Status = GCMResponse.ResponseResultStatus.Unavailable) then begin
-      self.OnPushFailed(self, lSingleMessage, new Exception('GCM was busy or unawailable'));
+    else if (res.Status = GCMMessageResult.ResultStatus.Unavailable) then begin
+      self.OnPushFailed(self, lSingleMessage, new Exception('GCM was busy or unavailable'));
     end
-    else if (res.Status = GCMResponse.ResponseResultStatus.NotRegistered) then begin
+    else if (res.Status = GCMMessageResult.ResultStatus.NotRegistered) then begin
       self.OnDeviceExpired(self, lSingleMessage.RegistrationIds:First(), nil);
     end
-
   end;
 end;
+
 
 end.
