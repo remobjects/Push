@@ -58,7 +58,7 @@ end;
 
 method ApplePushProviderService.BinaryToString(aBinary: Binary):String;
 begin
-  result := APSConnect.ByteArrayToString(aBinary.ToArray());
+  result := RemObjects.SDK.Push.APS.APSConnect.ByteArrayToString(aBinary.ToArray());
 end;
 
 method ApplePushProviderService.registerDevice(deviceToken: RemObjects.SDK.Types.Binary; additionalInfo: System.String);

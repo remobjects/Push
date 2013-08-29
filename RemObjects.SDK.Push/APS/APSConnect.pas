@@ -1,4 +1,4 @@
-﻿namespace RemObjects.SDK.Push;
+﻿namespace RemObjects.SDK.Push.APS;
 
 interface
 
@@ -12,7 +12,8 @@ uses
   System.Security.Permissions,
   System.Text,
   RemObjects.SDK,
-  RemObjects.SDK.Types;
+  RemObjects.SDK.Types,
+  RemObjects.SDK.Push;
 
 type
   APSConnect = public class(IDisposable, IPushConnect)

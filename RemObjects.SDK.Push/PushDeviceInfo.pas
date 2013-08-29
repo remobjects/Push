@@ -21,7 +21,7 @@ type
   ApplePushDeviceInfo = public class(PushDeviceInfo)
   public
     property &Type: String read 'APS'; override;
-    property ID: String read APSConnect.ByteArrayToString(Token); override;
+    property ID: String read RemObjects.SDK.Push.APS.APSConnect.ByteArrayToString(Token); override;
     property Token: array of Byte;
     property SubType: String;
   end;
