@@ -25,7 +25,7 @@ type
 
     method PushMessageAndBadgeNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
     method PushMessageBadgeAndSoundNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
-    method PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
+    method PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aContentAvailable: Boolean := true);
 
     class property Instance: GenericPushConnect read get_Instance;
 
@@ -78,9 +78,8 @@ end;
 
 method GenericPushConnect.PushMessageAndBadgeNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
 begin
-  // nil value for aBadge means we clear the badge.
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), nil); // send 0 to clear the Badge, on APS
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, aBadge, nil, nil);
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
       var lMessage := new GCMMessage();
@@ -92,10 +91,10 @@ begin
   end;
 end;
 
-method GenericPushConnect.PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
+method GenericPushConnect.PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aContentAvailable: Boolean := true);
 begin
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), nil, 1); // send 0 to clear the Badge, on APS
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, aBadge, nil, if aContentAvailable then 1 else nil);
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
       var lMessage := new GCMMessage();
@@ -116,9 +115,8 @@ end;
 
 method GenericPushConnect.PushMessageBadgeAndSoundNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
 begin
-  // nil value for aBadge means we clear the badge.
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), aSound); // send 0 to clear the Badge, on APS
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, aBadge, aSound, nil);
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
       var lMessage := new GCMMessage();
