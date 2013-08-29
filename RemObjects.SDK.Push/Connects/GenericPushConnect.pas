@@ -46,6 +46,7 @@ type
     method PushMessage(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32 := nil; aSound: String := nil);
     method PushBadge(aDevice: PushDeviceInfo; aBadge: nullable Int32);
     method PushSound(aDevice: PushDeviceInfo; aSound: String);
+    method PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
     event OnPushSent: MessageSentDelegate add addOnPushSent remove removeOnPushSent;
     event OnPushFailed: MessageFailedDelegate add addOnPushFailed remove removeOnPushFailed;
     event OnConnectException: PushExceptionDelegate add addOnPushException remove removeOnPushException;
@@ -108,6 +109,22 @@ begin
       end;
     end;
   end);
+end;
+
+method GenericPushConnect.PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
+begin
+  case aDevice type of
+    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), nil, 1); // send 0 to clear the Badge, on APS
+    GooglePushDeviceInfo: begin
+      var gDevice := aDevice as GooglePushDeviceInfo;
+      var lMessage := new GCMMessage();
+      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
+      lMessage.Data.Add("message", aMessage);
+      lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
+      // todo: ContentAvailable?
+      self.sendGcmMessage(lMessage);
+    end;
+  end;
 end;
 
 class method GenericPushConnect.getInstance: GenericPushConnect;

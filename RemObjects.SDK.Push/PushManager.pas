@@ -57,8 +57,6 @@ type
 implementation
 
 method PushManager.Save;
-require
-  assigned(fDeviceManager);
 begin
   fDeviceManager.Save();
 end;
@@ -68,7 +66,7 @@ require
   assigned(aDeviceManager);
 begin
   if (fDeviceManager ≠ aDeviceManager) then begin
-    Save();
+    if assigned(fDeviceManager) then Save();
     fDeviceManager := aDeviceManager;
   end;
 end;

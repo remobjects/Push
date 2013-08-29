@@ -141,6 +141,7 @@
     <Compile Include="GCM\GCMConnect.pas" />
     <Compile Include="GCM\GCMMessage.pas" />
     <Compile Include="GCM\GooglePushProviderService_Impl.pas">
+      <DisableDesigner>True</DisableDesigner>
       <SubType>Component</SubType>
       <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
     </Compile>

@@ -49,7 +49,7 @@ type
     method PushMessageNotification(aDevice: ApplePushDeviceInfo; aMessage: String);
     method PushBadgeNotification(aDevice: ApplePushDeviceInfo; aBadge: Int32);
     method PushAudioNotification(aDevice: ApplePushDeviceInfo; aSound: String);
-    method PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
+    method PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
 
     method GetFeedback(aCertificate: X509Certificate2);
 
@@ -195,7 +195,7 @@ begin
   PushRawNotification(aDevice, lJson);
 end;
 
-method APSConnect.PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String);
+method APSConnect.PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
 begin
   var lData := '';
   if assigned(aMessage) then begin
@@ -208,6 +208,10 @@ begin
   if assigned(aSound) then begin
     if length(lData) > 0 then lData := lData+',';
     lData := lData+String.Format('"sound":{0}',  JsonTokenizer.EncodeString(aSound));
+  end;
+  if assigned(aContentAvailable) then begin
+    if length(lData) > 0 then lData := lData+',';
+    lData := lData+String.Format('"content-available":{0}', valueOrDefault(aContentAvailable));
   end;
 
   var lJson := String.Format('{{"aps":{{{0}}}}}', lData);
