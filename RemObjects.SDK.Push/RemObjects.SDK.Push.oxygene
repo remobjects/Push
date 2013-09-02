@@ -146,6 +146,7 @@
       <DesignableClassName>RemObjects.SDK.Push.GooglePushProviderService</DesignableClassName>
     </Compile>
     <Compile Include="GCM\GCMResponse.pas" />
+    <None Include="MPNS\Extensions.pas" />
     <Compile Include="MPNS\MPNSConnect.pas" />
     <Compile Include="MPNS\MPNSMessages.pas" />
     <Compile Include="MPNS\MPNSResponse.pas" />

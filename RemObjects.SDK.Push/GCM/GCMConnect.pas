@@ -23,13 +23,14 @@ type
   protected
   public
     property &Type: String read "GCM";
+    method CheckSetup;
     property ApiKey: String;
     method PushMessage(aMessage: GCMMessage): GCMResponse;
     method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
 
-    event OnPushSent: MessageSentDelegate protected raise;
+    event OnPushSent: MessageSentHandler protected raise;
     event OnPushFailed: MessageFailedDelegate protected raise;
-    event OnConnectException: PushExceptionDelegate protected raise;
+    event OnConnectException: PushExceptionHandler protected raise;
     event OnDeviceExpired: DeviceExpiredDelegate protected raise;
     constructor; empty;
   end;
@@ -243,6 +244,12 @@ begin
       self.OnDeviceExpired(self, lSingleMessage.RegistrationIds:First(), nil);
     end
   end;
+end;
+
+method GCMConnect.CheckSetup;
+begin
+  if (String.IsNullOrEmpty(self.ApiKey)) then
+    raise new InvalidSetupException(self, 'ApiKey not provided');
 end;
 
 

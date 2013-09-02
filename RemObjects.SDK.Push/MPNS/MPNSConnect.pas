@@ -15,11 +15,12 @@ type
     method ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: MPNSMessage; out aResponse: MPNSResponse);
     method ProcessResponse(aResponse: MPNSResponse);
   public
-    event OnPushSent : MessageSentDelegate protected raise;
+    event OnPushSent : MessageSentHandler protected raise;
     event OnPushFailed : MessageFailedDelegate protected raise;
-    event OnConnectException : PushExceptionDelegate protected raise;
+    event OnConnectException : PushExceptionHandler protected raise;
     event OnDeviceExpired : DeviceExpiredDelegate protected raise;
     property &Type: String read "MPNS";
+    method CheckSetup;
 
     property WebServiceCertificate: System.Security.Cryptography.X509Certificates.X509Certificate2;
 
@@ -152,6 +153,13 @@ begin
     else
       self.OnPushFailed(self, aResponse.Message,new Exception('Unexpected http error ' + Int32(aResponse.HttpStatus)));
   end;
+end;
+
+method MPNSConnect.CheckSetup;
+begin
+  // TODO: implement setup check for this connect
+  // if (some check = false) then
+  // throw new InvalidSetupException(self, 'error message', inner exception or nil);
 end;
 
 end.

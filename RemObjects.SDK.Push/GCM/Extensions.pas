@@ -23,6 +23,7 @@ type
     method WithSound(aMessage: GCMMessage; aSound: String): GCMMessage;
     method WithBadge(aMessage: GCMMessage; aBadge: Integer): GCMMessage;
     method WithData(aMessage: GCMMessage; aKey, aValue: String): GCMMessage;
+    method WithSyncNeeded(aMessage: GCMMessage): GCMMessage;
     method GetSingleMessage(aMessage: GCMMessage; aIndex: Integer): GCMMessage;
   end;
 
@@ -92,6 +93,12 @@ end;
 method GCMMessageExtension.WithData(aMessage: GCMMessage; aKey: String; aValue: String): GCMMessage;
 begin
   aMessage.Data.Add(aKey, aValue);
+  exit (aMessage);
+end;
+
+method GCMMessageExtension.WithSyncNeeded(aMessage: GCMMessage): GCMMessage;
+begin
+  aMessage.Data['sync'] := 'true';
   exit (aMessage);
 end;
 

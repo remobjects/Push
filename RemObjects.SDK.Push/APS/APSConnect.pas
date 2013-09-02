@@ -36,6 +36,7 @@ type
     method Dispose;
 
     property &Type: String read "APS";
+    method CheckSetup;
     // Filename for Certificate .p12
     property MacCertificateFile: String write set_MacCertificateFile;
     property iOSCertificateFile: String write set_iOSCertificateFile;
@@ -49,13 +50,14 @@ type
     method PushMessageNotification(aDevice: ApplePushDeviceInfo; aMessage: String);
     method PushBadgeNotification(aDevice: ApplePushDeviceInfo; aBadge: Int32);
     method PushAudioNotification(aDevice: ApplePushDeviceInfo; aSound: String);
+    method PushSyncNeededNotification(aDevice: ApplePushDeviceInfo; aContentAvailable: Int32);
     method PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
 
     method GetFeedback(aCertificate: X509Certificate2);
 
-    event OnPushSent: MessageSentDelegate;
+    event OnPushSent: MessageSentHandler;
     event OnPushFailed: MessageFailedDelegate;
-    event OnConnectException: PushExceptionDelegate;
+    event OnConnectException: PushExceptionHandler;
     event OnDeviceExpired: DeviceExpiredDelegate;
 
     property ApsHost: String := 'gateway.push.apple.com';
@@ -195,6 +197,12 @@ begin
   PushRawNotification(aDevice, lJson);
 end;
 
+method APSConnect.PushSyncNeededNotification(aDevice: ApplePushDeviceInfo; aContentAvailable: Int32);
+begin
+  var lJson := String.Format('{{"aps":{{"content-available":{0}}}}}',  aContentAvailable);
+  PushRawNotification(aDevice, lJson);
+end;
+
 method APSConnect.PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
 begin
   var lData := '';
@@ -317,6 +325,13 @@ begin
     WebCertificateFile := lCertificatePath;
     Log('Loaded Apple Web Push Certificate from '+lCertificatePath);
   end;
+end;
+
+method APSConnect.CheckSetup;
+begin
+  // TODO: implement setup check for this connect
+  // if (some check = false) then
+  // throw new InvalidSetupException(self, 'error message', inner exception or nil);
 end;
 
 end.

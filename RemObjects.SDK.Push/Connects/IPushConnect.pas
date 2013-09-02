@@ -5,10 +5,11 @@ interface
 type
   IPushConnect = public interface
     property &Type: String read;
-    event OnPushSent: MessageSentDelegate;
+    event OnPushSent: MessageSentHandler;
     event OnPushFailed: MessageFailedDelegate;
-    event OnConnectException: PushExceptionDelegate;
+    event OnConnectException: PushExceptionHandler;
     event OnDeviceExpired: DeviceExpiredDelegate;
+    method CheckSetup();
   end;
 
 implementation

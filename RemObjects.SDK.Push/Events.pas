@@ -6,7 +6,7 @@ type
   /// <summary>
   /// Message sent successfully
   /// </summary>
-  MessageSentDelegate = public delegate(aSender: Object; aMessage: Object);
+  MessageSentHandler = public delegate(aSender: Object; aMessage: Object);
   /// <summary>
   /// Message failed to sent. anException containes the explanation.
   /// </summary>
@@ -19,7 +19,8 @@ type
   /// <summary>
   /// general unhandled exception appeared in connect during message sending
   /// </summary>
-  PushExceptionDelegate = public delegate(aSender: Object; anArgs: PushExceptionEventArgs);
+  PushExceptionHandler = public delegate(aSender: Object; anArgs: PushExceptionEventArgs);
+
 
   PushExceptionEventArgs = public class(RemObjects.SDK.ExceptionEventArgs)
   public
@@ -34,7 +35,19 @@ type
     property NewRegistrationId: String;
   end;
 
+  InvalidSetupException = public class(Exception)
+  public
+    property Connect: IPushConnect; readonly;
+    constructor(aConnect: IPushConnect; aMessage: String; aInnerException: Exception := nil);
+  end;
+
 implementation
+
+constructor InvalidSetupException(aConnect: IPushConnect; aMessage: String; aInnerException: Exception);
+begin
+  self.Connect := aConnect;
+  inherited constructor(aMessage, aInnerException);
+end;
 
 constructor PushExceptionEventArgs(aConnect: IPushConnect; anException: Exception);
 begin

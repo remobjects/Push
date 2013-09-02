@@ -13,9 +13,9 @@ uses
 type
   GenericPushConnect = public class(IPushConnect)
   private
-    fPushSent: MessageSentDelegate;
+    fPushSent: MessageSentHandler;
     fPushFailed: MessageFailedDelegate;
-    fPushException: PushExceptionDelegate;
+    fPushException: PushExceptionHandler;
     fDeviceExpired: DeviceExpiredDelegate;
 
     class var fInstance: GenericPushConnect;
@@ -26,12 +26,12 @@ type
     method Push(aDevice: PushDeviceInfo; anAction: Action);
     method sendGcmMessage(aMessage: GCMMessage);
 
-    method removeOnPushSent(param: MessageSentDelegate);
-    method addOnPushSent(param: MessageSentDelegate);
+    method removeOnPushSent(param: MessageSentHandler);
+    method addOnPushSent(param: MessageSentHandler);
     method addOnPushFailed(param: MessageFailedDelegate);
     method removeOnPushFailed(param: MessageFailedDelegate);
-    method addOnPushException(param: PushExceptionDelegate);
-    method removeOnPushException(param: PushExceptionDelegate);
+    method addOnPushException(param: PushExceptionHandler);
+    method removeOnPushException(param: PushExceptionHandler);
     method addOnDeviceExpired(param: DeviceExpiredDelegate);
     method removeOnDeviceExpired(param: DeviceExpiredDelegate);
   protected
@@ -40,16 +40,17 @@ type
     property APSConnect: APSConnect := new APSConnect; readonly;
     property GCMConnect: GCMConnect := new GCMConnect; readonly;
     property MPNSConnect: MPNSConnect := new MPNSConnect; readonly;
+    method CheckSetup;
 
 
     
-    method PushMessage(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32 := nil; aSound: String := nil);
+    method PushMessage(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32 := nil; aSound: String := nil; sync: Boolean := false);
     method PushBadge(aDevice: PushDeviceInfo; aBadge: nullable Int32);
     method PushSound(aDevice: PushDeviceInfo; aSound: String);
-    method PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
-    event OnPushSent: MessageSentDelegate add addOnPushSent remove removeOnPushSent;
+    method PushSyncNeeded(aDevice:PushDeviceInfo);
+    event OnPushSent: MessageSentHandler add addOnPushSent remove removeOnPushSent;
     event OnPushFailed: MessageFailedDelegate add addOnPushFailed remove removeOnPushFailed;
-    event OnConnectException: PushExceptionDelegate add addOnPushException remove removeOnPushException;
+    event OnConnectException: PushExceptionHandler add addOnPushException remove removeOnPushException;
     event OnDeviceExpired: DeviceExpiredDelegate add addOnDeviceExpired remove removeOnDeviceExpired;
     // TODO maybe later
     //method PushData(aDevice: PushDeviceInfo; aData: Dictionary<String, Object>);
@@ -59,11 +60,13 @@ type
 
 implementation
 
-method GenericPushConnect.PushMessage(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32 := nil; aSound: String := nil);
+method GenericPushConnect.PushMessage(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32 := nil; aSound: String := nil; sync: Boolean := false);
 begin
   self.Push(aDevice, ()-> begin
     case aDevice type of
-      ApplePushDeviceInfo: self.APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, aBadge, aSound);
+      ApplePushDeviceInfo: begin
+        self.APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, aBadge, aSound, 1);
+      end;
       GooglePushDeviceInfo: begin
         var gDevice := aDevice as GooglePushDeviceInfo;
 
@@ -72,6 +75,8 @@ begin
                             .WithText(aMessage)
                             .WithSound(aSound)
                             .WithBadge(valueOrDefault(aBadge, 0));
+        if (sync) then
+          lMessage.WithSyncNeeded();
 
         self.sendGcmMessage(lMessage);
         end;
@@ -111,17 +116,18 @@ begin
   end);
 end;
 
-method GenericPushConnect.PushMessageBadgeAndContentNotification(aDevice: PushDeviceInfo; aMessage: String; aBadge: nullable Int32);
+method GenericPushConnect.PushSyncNeeded(aDevice: PushDeviceInfo);
 begin
   case aDevice type of
-    ApplePushDeviceInfo: APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aMessage, valueOrDefault(aBadge), nil, 1); // send 0 to clear the Badge, on APS
+    ApplePushDeviceInfo: begin
+      APSConnect.PushSyncNeededNotification(aDevice as ApplePushDeviceInfo, 1);
+    end;
     GooglePushDeviceInfo: begin
       var gDevice := aDevice as GooglePushDeviceInfo;
-      var lMessage := new GCMMessage();
-      lMessage.RegistrationIds.Add(gDevice.RegistrationID);
-      lMessage.Data.Add("message", aMessage);
-      lMessage.Data.Add("badge", valueOrDefault(aBadge, 0).ToString);
-      // todo: ContentAvailable?
+      var lMessage := new GCMMessage()
+                          .WithId(gDevice.RegistrationID)
+                          .WithSyncNeeded();
+      lMessage.CollapseKey := gDevice.RegistrationID:Substring(10);
       self.sendGcmMessage(lMessage);
     end;
   end;
@@ -175,16 +181,16 @@ begin
   yield self.MPNSConnect;
 end;
 
-method GenericPushConnect.addOnPushSent(param: MessageSentDelegate);
+method GenericPushConnect.addOnPushSent(param: MessageSentHandler);
 begin  
-  fPushSent := MessageSentDelegate(&Delegate.Combine(fPushSent, param));
+  fPushSent := MessageSentHandler(&Delegate.Combine(fPushSent, param));
   for each connect in getConnects do
     connect.OnPushSent += param;
 end;
 
-method GenericPushConnect.removeOnPushSent(param: MessageSentDelegate);
+method GenericPushConnect.removeOnPushSent(param: MessageSentHandler);
 begin
-  fPushSent := MessageSentDelegate(&Delegate.Remove(fPushSent, param));
+  fPushSent := MessageSentHandler(&Delegate.Remove(fPushSent, param));
   for each connect in getConnects do
     connect.OnPushSent -= param;
 end;
@@ -203,16 +209,16 @@ begin
     connect.OnPushFailed -= param;
 end;
 
-method GenericPushConnect.addOnPushException(param: PushExceptionDelegate);
+method GenericPushConnect.addOnPushException(param: PushExceptionHandler);
 begin
-  fPushException := PushExceptionDelegate(&Delegate.Combine(fPushException, param));
+  fPushException := PushExceptionHandler(&Delegate.Combine(fPushException, param));
   for each connect in getConnects do
     connect.OnConnectException += param;
 end;
 
-method GenericPushConnect.removeOnPushException(param: PushExceptionDelegate);
+method GenericPushConnect.removeOnPushException(param: PushExceptionHandler);
 begin
-  fPushException := PushExceptionDelegate(&Delegate.Remove(fPushException, param));
+  fPushException := PushExceptionHandler(&Delegate.Remove(fPushException, param));
   for each connect in getConnects do
     connect.OnConnectException -= param;
 end;
@@ -229,6 +235,13 @@ begin
   fDeviceExpired := DeviceExpiredDelegate(&Delegate.Remove(fDeviceExpired, param));
   for each connect in getConnects do
     connect.OnDeviceExpired -= param;
+end;
+
+method GenericPushConnect.CheckSetup;
+begin
+  for each connect in self.getConnects() do begin
+    connect.CheckSetup();
+  end;
 end;
 
 end.
