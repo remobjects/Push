@@ -55,10 +55,9 @@ type
 
     method GetFeedback(aCertificate: X509Certificate2);
 
-    event OnPushSent: MessageSentHandler;
-    event OnPushFailed: MessageFailedDelegate;
-    event OnConnectException: PushExceptionHandler;
-    event OnDeviceExpired: DeviceExpiredDelegate;
+    event PushSent: MessageSentHandler;
+    event PushFailed: MessageFailedHandler;
+    event DeviceExpired: DeviceExpiredHandler;
 
     property ApsHost: String := 'gateway.push.apple.com';
     property ApsPort: Int32 := 2195;

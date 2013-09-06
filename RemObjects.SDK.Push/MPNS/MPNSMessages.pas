@@ -32,6 +32,8 @@ type
     ///</value>
     property SendInterval: nullable MPNSMessageInterval;
 
+    property OSVersion: nullable MPNSDeviceVersion;
+
     /// <summary>
     /// type of push notification being sent.
     /// </summary>
@@ -48,12 +50,23 @@ type
     constructor;
   end;
 
-  MPNSDataMessage = public class(MPNSRawMessage)
+  MPNSDataMessage = public sealed class(MPNSRawMessage)
   private
     fData: Dictionary<String, Object> := new Dictionary<String,Object>();
   public
     method ToXmlString: String; override;
     property Data: Dictionary<String, Object> read fData;
+  end;
+
+  MPNSToastMessage = public sealed class(MPNSMessage) 
+  public
+    method ToXmlString: String; override;
+    constructor;
+
+    property Text1: String;
+    property Text2: String;
+    property NavigatePath: String;
+    property Parameters: Dictionary<String, String>:= new Dictionary<String,String>();
   end;
 
 implementation
@@ -84,6 +97,54 @@ begin
                                         new XAttribute("key", XmlEscape(item.Key))));
 
   exit (lDoc.ToString());
+end;
+
+method MPNSToastMessage.ToXmlString: String;
+begin
+  var wp: XNamespace := 'WPNotification';
+  var lPayload := new XElement(wp + 'Notification',
+                                   new XAttribute(XNamespace.Xmlns + 'wp', 'WPNotification'));
+
+  var lToast := new XElement(wp + 'Toast');
+
+  if (not String.IsNullOrEmpty(Text1)) then
+    lToast.Add(new XElement(wp + 'Text1', Text1));
+
+  if not String.IsNullOrEmpty(Text2) then
+    lToast.Add(new XElement(wp + 'Text2', Text2));
+
+
+  if  (self.OSVersion > MPNSDeviceVersion.Seven)  then  begin
+    if  (not String.IsNullOrEmpty(NavigatePath)) or (Parameters.Count > 0)  then  begin
+      var lBuilder := new StringBuilder();
+
+      if not String.IsNullOrEmpty(NavigatePath) then
+        lBuilder.Append(XmlEscape('/' + NavigatePath.TrimStart('/')));
+
+      if (Parameters.Count > 0) then begin
+        lBuilder.Append('?');
+
+        for each key: String in Parameters.Keys do
+          lBuilder.Append(XmlEscape(key + '=' + Parameters[key].ToString()) + '&amp;')
+      end;
+
+      var lValue := lBuilder.ToString();
+
+      if (not String.IsNullOrEmpty(lValue)) and (lValue.EndsWith('&amp;')) then
+        lValue.Substring(0, lValue.Length - '&amp;'.Length);
+
+      if not String.IsNullOrEmpty(lValue) then
+        lToast.Add(new XElement(wp + 'Param', lValue))
+    end
+  end;
+
+  lPayload.Add(lToast);
+  exit lPayload.ToString();
+end;
+
+constructor MPNSToastMessage;
+begin
+  self.NotificationType := MPNSMessageType.Toast;
 end;
 
 end.

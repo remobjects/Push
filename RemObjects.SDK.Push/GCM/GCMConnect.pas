@@ -28,10 +28,9 @@ type
     method PushMessage(aMessage: GCMMessage): GCMResponse;
     method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;
 
-    event OnPushSent: MessageSentHandler protected raise;
-    event OnPushFailed: MessageFailedDelegate protected raise;
-    event OnConnectException: PushExceptionHandler protected raise;
-    event OnDeviceExpired: DeviceExpiredDelegate protected raise;
+    event PushSent: MessageSentHandler protected raise;
+    event PushFailed: MessageFailedHandler protected raise;
+    event DeviceExpired: DeviceExpiredHandler protected raise;
     constructor; empty;
   end;
 
@@ -228,20 +227,20 @@ begin
     var lSingleMessage := iif(lMessage.RegistrationIds.Count > 0, lMessage.GetSingleMessage(idx), lMessage);
 
     if (res.Status = GCMMessageResult.ResultStatus.Ok) then
-      self.OnPushSent(self, lSingleMessage)
+      self.PushSent(self, lSingleMessage)
     else if (res.Status = GCMMessageResult.ResultStatus.NewRegistrationId) then begin
       var lNew := res.NewRegistrationId;
       var lOld := String.Empty;
       if (lSingleMessage.RegistrationIds:Count > 0) then
         lOld := lSingleMessage.RegistrationIds[0];
 
-      self.OnDeviceExpired(self, lOld, lNew);
+      self.DeviceExpired(self, lOld, lNew);
     end
     else if (res.Status = GCMMessageResult.ResultStatus.Unavailable) then begin
-      self.OnPushFailed(self, lSingleMessage, new Exception('GCM was busy or unavailable'));
+      self.PushFailed(self, lSingleMessage, new Exception('GCM was busy or unavailable'));
     end
     else if (res.Status = GCMMessageResult.ResultStatus.NotRegistered) then begin
-      self.OnDeviceExpired(self, lSingleMessage.RegistrationIds:First(), nil);
+      self.DeviceExpired(self, lSingleMessage.RegistrationIds:First(), nil);
     end
   end;
 end;

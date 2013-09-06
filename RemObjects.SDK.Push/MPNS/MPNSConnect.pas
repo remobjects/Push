@@ -15,10 +15,9 @@ type
     method ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: MPNSMessage; out aResponse: MPNSResponse);
     method ProcessResponse(aResponse: MPNSResponse);
   public
-    event OnPushSent : MessageSentHandler protected raise;
-    event OnPushFailed : MessageFailedDelegate protected raise;
-    event OnConnectException : PushExceptionHandler protected raise;
-    event OnDeviceExpired : DeviceExpiredDelegate protected raise;
+    event PushSent : MessageSentHandler protected raise;
+    event PushFailed : MessageFailedHandler protected raise;
+    event DeviceExpired : DeviceExpiredHandler protected raise;
     property &Type: String read "MPNS";
     method CheckSetup;
 
@@ -26,6 +25,18 @@ type
 
     method PushMessage(aMessage: MPNSMessage): MPNSResponse;
     method TryPushMessage(aMessage: MPNSMessage; out aResponse: MPNSResponse): Boolean;
+
+    // additional global setup
+    // raw - delivered only if app started
+    // raw - more flexible
+    // toast, tile - can be delivered always
+
+    // from generic connect
+    //  push text [, sound][, badge][, syncNeeded] -> toast [with params] or raw
+    //  push sync needed -> toast('synchronization needed') or raw (sync=true)
+    //  push badge -> tile?
+
+    // let's always send raw. If user wants toast, he handle MessageCreating event!
   end;
 
 implementation
@@ -126,32 +137,32 @@ begin
       case (aResponse.NotificationStatus) of
         MPNSResponse.NotificationStatus.Received, // delivered to device
         MPNSResponse.NotificationStatus.Suppressed: // not delivered due to device app
-          self.OnPushSent(self, aResponse.Message);
+          self.PushSent(self, aResponse.Message);
         MPNSResponse.NotificationStatus.QueueFull:
-          self.OnPushFailed(self, aResponse.Message, new Exception('Message discarded as device queue is full (30 messages).'));
+          self.PushFailed(self, aResponse.Message, new Exception('Message discarded as device queue is full (30 messages).'));
       end;
     end;
     HttpStatusCode.BadRequest: begin // 400
-      self.OnPushFailed(self, aResponse.Message, new Exception('Malformed notification URI'));
+      self.PushFailed(self, aResponse.Message, new Exception('Malformed notification URI'));
     end;
     HttpStatusCode.Unauthorized: begin // 401
-      self.OnPushFailed(self, aResponse.Message, new Exception('Sending notification is unauthorized'));
+      self.PushFailed(self, aResponse.Message, new Exception('Sending notification is unauthorized'));
     end;
     HttpStatusCode.NotFound: begin // 404
-      self.OnDeviceExpired(self, aResponse.Message.NotificationURI, String.Empty);
+      self.DeviceExpired(self, aResponse.Message.NotificationURI, String.Empty);
       //self.OnPushFailed(self, aResponse.Message, new Exception('Subscription is invalid'));
     end;
     HttpStatusCode.NotAcceptable: begin // 406
-      self.OnPushFailed(self, aResponse.Message, new Exception('Per day throttling limit reached for the subscription.'));
+      self.PushFailed(self, aResponse.Message, new Exception('Per day throttling limit reached for the subscription.'));
     end;
     HttpStatusCode.PreconditionFailed: begin // 412
-      self.OnPushFailed(self, aResponse.Message, new Exception('Message won''t be delivered. Device is disconnected'));
+      self.PushFailed(self, aResponse.Message, new Exception('Message won''t be delivered. Device is disconnected'));
     end;
     HttpStatusCode.ServiceUnavailable: begin
-      self.OnPushFailed(self, aResponse.Message, new Exception('Push Notification Service is unable to process the request. Resend later.'));
+      self.PushFailed(self, aResponse.Message, new Exception('Push Notification Service is unable to process the request. Resend later.'));
     end
     else
-      self.OnPushFailed(self, aResponse.Message,new Exception('Unexpected http error ' + Int32(aResponse.HttpStatus)));
+      self.PushFailed(self, aResponse.Message,new Exception('Unexpected http error ' + Int32(aResponse.HttpStatus)));
   end;
 end;
 

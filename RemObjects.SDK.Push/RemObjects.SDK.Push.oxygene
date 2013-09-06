@@ -131,8 +131,6 @@
       <DesignableClassName>RemObjects.SDK.Push.ApplePushProviderService</DesignableClassName>
     </Compile>
     <Compile Include="APS\APSConnect.pas" />
-    <Compile Include="Connects\GenericPushConnect.pas" />
-    <Compile Include="Connects\IPushConnect.pas" />
     <Compile Include="DeviceManagers\FileDeviceManager.pas" />
     <Compile Include="DeviceManagers\IDeviceManager.pas" />
     <Compile Include="DeviceManagers\InMemoryDeviceManager.pas" />
@@ -147,6 +145,8 @@
     </Compile>
     <Compile Include="GCM\GCMResponse.pas" />
     <None Include="MPNS\Extensions.pas" />
+    <Compile Include="Generic\GenericPushConnect.pas" />
+    <Compile Include="IPushConnect.pas" />
     <Compile Include="MPNS\MPNSConnect.pas" />
     <Compile Include="MPNS\MPNSMessages.pas" />
     <Compile Include="MPNS\MPNSResponse.pas" />
@@ -170,11 +170,11 @@
     <EmbeddedResource Include="PushProvider.RODL" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Connects" />
     <Folder Include="DeviceManagers" />
     <Folder Include="MPNS" />
     <Folder Include="GCM" />
     <Folder Include="APS" />
+    <Folder Include="Generic" />
     <Folder Include="Services" />
     <Folder Include="Properties\" />
   </ItemGroup>
