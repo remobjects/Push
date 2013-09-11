@@ -204,24 +204,24 @@ end;
 
 method APSConnect.PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
 begin
-  var lData := '';
+  var lData := new StringBuilder();
   if assigned(aMessage) then begin
-    lData := lData+String.Format('"alert":{0}', JsonTokenizer.EncodeString(aMessage));
+    lData.AppendFormat('"alert":{0}', JsonTokenizer.EncodeString(aMessage));
   end;
   if assigned(aBadge) then begin
-   if length(lData) > 0 then lData := lData+',';
-    lData := lData+String.Format('"badge":{0}', aBadge);
+    if (lData.Length > 0) then lData.Append(',');
+    lData.AppendFormat('"badge":{0}', aBadge);
   end;
   if assigned(aSound) then begin
-    if length(lData) > 0 then lData := lData+',';
-    lData := lData+String.Format('"sound":{0}',  JsonTokenizer.EncodeString(aSound));
+    if (lData.Length > 0) then lData.Append(',');
+    lData.AppendFormat('"sound":{0}',  JsonTokenizer.EncodeString(aSound));
   end;
   if assigned(aContentAvailable) then begin
-    if length(lData) > 0 then lData := lData+',';
-    lData := lData+String.Format('"content-available":{0}', valueOrDefault(aContentAvailable));
+    if (lData.Length > 0) then lData.Append(',');
+    lData.AppendFormat('"content-available":{0}', valueOrDefault(aContentAvailable));
   end;
 
-  var lJson := String.Format('{{"aps":{{{0}}}}}', lData);
+  var lJson := String.Format('{{"aps":{{{0}}}}}', lData.ToString);
   PushRawNotification(aDevice, lJson);
 end;
 
