@@ -19,7 +19,7 @@ type
     event PushFailed : MessageFailedHandler protected raise;
     event DeviceExpired : DeviceExpiredHandler protected raise;
     property &Type: String read "MPNS";
-    method CheckSetup;
+    method CheckSetup; empty; // no setup needed for this connect
 
     property WebServiceCertificate: System.Security.Cryptography.X509Certificates.X509Certificate2;
 
@@ -32,9 +32,9 @@ type
     // toast, tile - can be delivered always
 
     // from generic connect
-    //  push text [, sound][, badge][, syncNeeded] -> toast [with params] or raw
+    //  push text [, sound][, badge][, syncNeeded] -> toast [with params] or raw or tile
     //  push sync needed -> toast('synchronization needed') or raw (sync=true)
-    //  push badge -> tile?
+    //  push badge -> tile
 
     // let's always send raw. If user wants toast, he handle MessageCreating event!
   end;
@@ -164,13 +164,6 @@ begin
     else
       self.PushFailed(self, aResponse.Message,new Exception('Unexpected http error ' + Int32(aResponse.HttpStatus)));
   end;
-end;
-
-method MPNSConnect.CheckSetup;
-begin
-  // TODO: implement setup check for this connect
-  // if (some check = false) then
-  // throw new InvalidSetupException(self, 'error message', inner exception or nil);
 end;
 
 end.

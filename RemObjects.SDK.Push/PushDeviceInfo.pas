@@ -36,15 +36,14 @@ type
   WindowsPushDeviceInfo = public class(PushDeviceInfo)
   public
     property &Type: String read 'WNS'; override;
-    property ID: String read URI.ToString(); override;
-    property URI: Uri;
+    property ID: String read NotificationURI.ToString(); override;
+    property NotificationURI: Uri;
   end;
 
   WindowsPhonePushDeviceInfo = public class(WindowsPushDeviceInfo)
   public
     property &Type: String read 'MPNS'; override;
     property ID: String read DeviceID; override;
-    property NotificationURI: String;
     property DeviceID: String;
     property OSVersion: String;
   end;

@@ -37,8 +37,8 @@ type
     method Dispose(aDisposing: System.Boolean); override;
   public 
     constructor;
-    method registerDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String); virtual;
-    method unregisterDevice(deviceId: System.String); virtual;
+    method RegisterDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String); virtual;
+    method UnregisterDevice(deviceId: System.String); virtual;
   end;
   
 implementation
@@ -71,7 +71,7 @@ begin
   File.AppendAllText(Path.ChangeExtension(typeOf(self).Assembly.Location, '.log'), DateTime.Now.ToString('yyyy-MM-dd HH:mm:ss')+' '+aMessage+#13#10);
 end;
 
-method WindowsPhonePushProviderService.registerDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String);
+method WindowsPhonePushProviderService.RegisterDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String);
 begin
   try
     Log('Push(MPNS) registration for '+ deviceId);
@@ -79,7 +79,7 @@ begin
     if PushManager.DeviceManager.TryGetDevice(deviceId, out lDevice) then begin
       Log('Push(MPNS) registration updated for '+ deviceId);
 
-      WindowsPhonePushDeviceInfo(lDevice).NotificationURI := pushNotificationURI;
+      WindowsPhonePushDeviceInfo(lDevice).NotificationURI := new Uri(pushNotificationURI);
       WindowsPhonePushDeviceInfo(lDevice).OSVersion := osVersion;
       PushManager.UpdateDevice(lDevice, additionalInfo);
       PushManager.Save;
@@ -88,7 +88,7 @@ begin
       Log('Push(MPNS) registration new for '+ deviceId);
       var p := new WindowsPhonePushDeviceInfo(
                                        DeviceID := deviceId,
-                                       NotificationURI := pushNotificationURI,
+                                       NotificationURI := new Uri(pushNotificationURI),
                                        UserReference := iif(HasSession, Session['UserID']:ToString, nil),
                                        ClientInfo := additionalInfo, 
                                        ServerInfo := nil,
@@ -105,7 +105,7 @@ begin
   end;
 end;
 
-method WindowsPhonePushProviderService.unregisterDevice(deviceId: System.String);
+method WindowsPhonePushProviderService.UnregisterDevice(deviceId: System.String);
 begin
   if (PushManager.RemoveDevice(deviceId)) then
     PushManager.Save;

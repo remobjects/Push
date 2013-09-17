@@ -62,8 +62,8 @@ type
   WindowsPhonePushProviderService_Invoker = public class(RemObjects.SDK.Server.Invoker)
   public 
     constructor;
-    class method Invoke_registerDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
-    class method Invoke_unregisterDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
+    class method Invoke_RegisterDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
+    class method Invoke_UnregisterDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
   end;
   
   [RemObjects.SDK.Activator]
@@ -171,23 +171,23 @@ begin
   inherited constructor();
 end;
 
-class method WindowsPhonePushProviderService_Invoker.Invoke_registerDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
+class method WindowsPhonePushProviderService_Invoker.Invoke_RegisterDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
 begin
   var deviceId: System.String := __Message.ReadAnsiString('deviceId');
   var pushNotificationURI: System.String := __Message.ReadAnsiString('pushNotificationURI');
   var osVersion: System.String := __Message.ReadAnsiString('osVersion');
   var additionalInfo: System.String := __Message.ReadAnsiString('additionalInfo');
-  (__Instance as IWindowsPhonePushProviderService).registerDevice(deviceId, pushNotificationURI, osVersion, additionalInfo);
-  __Message.InitializeResponseMessage(__ServerChannelInfo, 'PushProvider', 'WindowsPhonePushProviderService', 'registerDeviceResponse');
+  (__Instance as IWindowsPhonePushProviderService).RegisterDevice(deviceId, pushNotificationURI, osVersion, additionalInfo);
+  __Message.InitializeResponseMessage(__ServerChannelInfo, 'PushProvider', 'WindowsPhonePushProviderService', 'RegisterDeviceResponse');
   __Message.FinalizeMessage();
   __oResponseOptions := RemObjects.SDK.Server.ResponseOptions.roNoResponse;
 end;
 
-class method WindowsPhonePushProviderService_Invoker.Invoke_unregisterDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
+class method WindowsPhonePushProviderService_Invoker.Invoke_UnregisterDevice(__Instance: RemObjects.SDK.IROService; __Message: RemObjects.SDK.IMessage; __ServerChannelInfo: RemObjects.SDK.Server.IServerChannelInfo; out __oResponseOptions: RemObjects.SDK.Server.ResponseOptions);
 begin
   var deviceId: System.String := __Message.ReadAnsiString('deviceId');
-  (__Instance as IWindowsPhonePushProviderService).unregisterDevice(deviceId);
-  __Message.InitializeResponseMessage(__ServerChannelInfo, 'PushProvider', 'WindowsPhonePushProviderService', 'unregisterDeviceResponse');
+  (__Instance as IWindowsPhonePushProviderService).UnregisterDevice(deviceId);
+  __Message.InitializeResponseMessage(__ServerChannelInfo, 'PushProvider', 'WindowsPhonePushProviderService', 'UnregisterDeviceResponse');
   __Message.FinalizeMessage();
   __oResponseOptions := RemObjects.SDK.Server.ResponseOptions.roNoResponse;
 end;

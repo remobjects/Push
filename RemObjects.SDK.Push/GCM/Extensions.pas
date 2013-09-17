@@ -19,8 +19,10 @@ type
   GCMMessageExtension = public static class
   public
     method WithId(aMessage: GCMMessage; aRegistrationId: String): GCMMessage;
+    method WithTitle(aMessage: GCMMessage; aTitle: String): GCMMessage;
     method WithText(aMessage: GCMMessage; aText: String): GCMMessage;
     method WithSound(aMessage: GCMMessage; aSound: String): GCMMessage;
+    method WithImage(aMessage: GCMMessage; anImage: String): GCMMessage;
     method WithBadge(aMessage: GCMMessage; aBadge: Integer): GCMMessage;
     method WithData(aMessage: GCMMessage; aKey, aValue: String): GCMMessage;
     method WithSyncNeeded(aMessage: GCMMessage): GCMMessage;
@@ -69,6 +71,13 @@ begin
   exit (aMessage);
 end;
 
+method GCMMessageExtension.WithTitle(aMessage: GCMMessage; aTitle: String): GCMMessage;
+begin
+  if (length(aTitle) > 0) then
+    aMessage.Data["title"] := aTitle;
+  exit (aMessage);
+end;
+
 method GCMMessageExtension.WithText(aMessage: GCMMessage; aText: String): GCMMessage;
 begin
   if (length(aText) > 0) then
@@ -81,6 +90,14 @@ begin
   if (length(aSound) > 0) then
     aMessage.Data["sound"] := aSound;
   exit (aMessage);
+end;
+
+method GCMMessageExtension.WithImage(aMessage: GCMMessage; anImage: String): GCMMessage;
+begin
+  if (length(anImage) > 0) then
+    aMessage.Data["image"] := anImage;
+  exit (aMessage);
+
 end;
 
 method GCMMessageExtension.WithBadge(aMessage: GCMMessage; aBadge: Integer): GCMMessage;

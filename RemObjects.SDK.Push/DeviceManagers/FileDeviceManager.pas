@@ -56,12 +56,12 @@ begin
           lDeviceNode.Add(new XAttribute('RegistrationID', GooglePushDeviceInfo(lInfo).RegistrationID));
         end;
       WindowsPhonePushDeviceInfo: begin
-          lDeviceNode.Add(new XAttribute('URI', WindowsPushDeviceInfo(lInfo).URI.ToString()));
+          lDeviceNode.Add(new XAttribute('URI', WindowsPhonePushDeviceInfo(lInfo).NotificationURI.ToString()));
           lDeviceNode.Add(new XAttribute('OSVersion', WindowsPhonePushDeviceInfo(lInfo).OSVersion));
           lDeviceNode.Add(new XAttribute('DeviceID', WindowsPhonePushDeviceInfo(lInfo).DeviceID));
         end;
       WindowsPushDeviceInfo: begin
-          lDeviceNode.Add(new XAttribute('URI', WindowsPushDeviceInfo(lInfo).URI.ToString()));
+          lDeviceNode.Add(new XAttribute('URI', WindowsPushDeviceInfo(lInfo).NotificationURI.ToString()));
         end;
     end;
     lDeviceNode.Add(new XElement('User',lInfo.UserReference));
@@ -105,12 +105,12 @@ begin
             GooglePushDeviceInfo(lInfo).RegistrationID := lDeviceNode.Attribute('RegistrationID').Value;
           end;
         WindowsPhonePushDeviceInfo: begin
-            WindowsPushDeviceInfo(lInfo).URI := new Uri(lDeviceNode.Attribute('URL').Value);
+            WindowsPhonePushDeviceInfo(lInfo).NotificationURI := new Uri(lDeviceNode.Attribute('URI').Value);
             WindowsPhonePushDeviceInfo(lInfo).OSVersion := lDeviceNode.Attribute('OSVersion').Value;
             WindowsPhonePushDeviceInfo(lInfo).DeviceID := lDeviceNode.Attribute('DeviceID').Value;
           end;
         WindowsPushDeviceInfo: begin
-            WindowsPushDeviceInfo(lInfo).URI := new Uri(lDeviceNode.Attribute('URL').Value);
+            WindowsPushDeviceInfo(lInfo).NotificationURI := new Uri(lDeviceNode.Attribute('URI').Value);
           end;
       end;
 

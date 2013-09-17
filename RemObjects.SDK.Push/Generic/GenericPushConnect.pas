@@ -15,8 +15,10 @@ type
 
   GenericMessageData = public class
   public
+    Title: String;
     Text: String;
     Sound: String;
+    Image: String;
     Badge: nullable Int32;
     SyncNeeded: Boolean;
   end;
@@ -52,9 +54,20 @@ type
     property MPNSConnect: MPNSConnect := new MPNSConnect; readonly;
     method CheckSetup;
 
+    // the problem with generic connect is that in Android the reaction on message is defined clientside (toast, notification bar, widget, etc)
+    // while on Windows Phone and iOs server decides what it will be (toast, alert, tile, badge, etc).
+
+    // suggested types
+    // Message (text, subtext)
+    // Tile (badge, text, image?)
+    // Raw (any key-value pairs)
+    // Common (text, sound, badge, sync)
+
+    // all types turned to Raw messages for each connect. If you want other type of messages (i.e. Toast of Tile for MPNS, then handle MessageCreating event)
 
     
-    method PushMessage(aDevice: PushDeviceInfo; aText: String; aBadge: nullable Int32 := nil; aSound: String := nil; sync: Boolean := false);
+    method PushMessage(aDevice: PushDeviceInfo; aTitle, aText: String);
+    method PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String);
     method PushBadge(aDevice: PushDeviceInfo; aBadge: nullable Int32);
     method PushSound(aDevice: PushDeviceInfo; aSound: String);
     method PushSyncNeeded(aDevice:PushDeviceInfo);
@@ -74,7 +87,7 @@ type
 
 implementation
 
-method GenericPushConnect.PushMessage(aDevice: PushDeviceInfo; aText: String; aBadge: nullable Int32 := nil; aSound: String := nil; sync: Boolean := false);
+method GenericPushConnect.PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String);
 begin
   self.Push(aDevice, ()-> begin
     
@@ -83,7 +96,7 @@ begin
     var lCbCreated := self.MessageCreated;
     var lMessageData: GenericMessageData;
     if (lCbSend <> nil) or (lCbCreated <> nil) or (lCbCreating <> nil) then begin
-      lMessageData := new GenericMessageData(Text := aText, Badge := aBadge, Sound := aSound, SyncNeeded := sync);
+      lMessageData := new GenericMessageData(Text := aText, Title := aTitle, Badge := aBadge, Sound := aSound, Image := anImage, SyncNeeded := false);
     end;
 
     {$REGION  protected method OnMessageSend() begin }
@@ -123,10 +136,10 @@ begin
           lMessage := new GCMMessage()
                               .WithId(gDevice.RegistrationID)
                               .WithText(aText)
+                              .WithTitle(aTitle)
                               .WithSound(aSound)
+                              .WithImage(anImage)
                               .WithBadge(valueOrDefault(aBadge, 0));
-          if (sync) then
-            lMessage.WithSyncNeeded();
         end;
 
         {$REGION protected method OnMessageCreated() begin }
@@ -157,14 +170,14 @@ begin
         if (lMessage = nil) then begin // default message creation
           var lWpDevice := aDevice as WindowsPhonePushDeviceInfo;
           var lDataMessage := new MPNSDataMessage();
-          lDataMessage.NotificationURI := lWpDevice.NotificationURI;
+          lDataMessage.NotificationURI := lWpDevice.NotificationURI.ToString;
           lDataMessage.Data.Add('message', aText);
           if (assigned(aBadge)) then
-            lDataMessage.Data.Add("badge", aBadge.ToString(System.Globalization.CultureInfo.InvariantCulture));
-          if (assigned(aSound)) then
-            lDataMessage.Data.Add("sound", aSound);
-          if (sync) then
-            lDataMessage.Data.Add('sync', true);
+            lDataMessage.Data["badge"] := aBadge.ToString(System.Globalization.CultureInfo.InvariantCulture);
+          if (not String.IsNullOrEmpty(aSound)) then
+            lDataMessage.Data["sound"]:= aSound;
+          if (not String.IsNullOrEmpty(aSound)) then
+            lDataMessage.Data["image"] := anImage;
 
           lMessage := lDataMessage;
         end;
@@ -180,6 +193,24 @@ begin
       end;
     end;
   end);  
+end;
+
+method GenericPushConnect.PushMessage(aDevice: PushDeviceInfo; aTitle: String; aText: String);
+begin
+  self.Push(aDevice, ()-> begin
+    case aDevice type of
+      ApplePushDeviceInfo: APSConnect.PushMessageNotification((aDevice as ApplePushDeviceInfo), aText);
+      GooglePushDeviceInfo: begin
+        var gDevice := aDevice as GooglePushDeviceInfo;
+        var lMessage := new GCMMessage()
+                            .WithId(gDevice.RegistrationID)
+                            .WithText(aText)
+                            .WithTitle(aTitle);
+        self.sendGcmMessage(lMessage);
+      end;
+    end;
+  end);
+
 end;
 
 method GenericPushConnect.PushBadge(aDevice: PushDeviceInfo; aBadge: nullable Int32);
@@ -268,9 +299,10 @@ begin
       var lEvent := self.ConnectException;
       if (assigned(lEvent)) then begin
         var lConnect: IPushConnect;
-        case aDevice type of
-          ApplePushDeviceInfo: lConnect := self.APSConnect;
-          GooglePushDeviceInfo: lConnect := self.GCMConnect;
+        lConnect := case aDevice type of
+          ApplePushDeviceInfo: self.APSConnect as IPushConnect;
+          GooglePushDeviceInfo: self.GCMConnect as IPushConnect;
+          WindowsPhonePushDeviceInfo: self.MPNSConnect as IPushConnect;
         end;
         var lArgs := new PushExceptionEventArgs(lConnect, ex);
         lEvent(self, lArgs);

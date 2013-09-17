@@ -49,7 +49,7 @@
 <Interfaces>
 <Interface Name="Default" UID="{55FC00D8-4FBC-442E-88D1-D70152B205C7}">
 <Operations>
-<Operation Name="registerDevice" UID="{2839AFA2-E710-46EF-B8FA-32304E770CB1}">
+<Operation Name="RegisterDevice" UID="{2839AFA2-E710-46EF-B8FA-32304E770CB1}">
 <Documentation><![CDATA[It's up to user to make deviceId unique and persist it. He can choose wheter to use vendorId from DeviceExtendedProperties.GetValue("DeviceUniqueId") or generate some GUID, store it in IsolatedStorage and retrieve it each time the notification started.
 All this method expects is that deviceId won't be changed for the app (while Push Notification URL can be changed by the MPNS).]]></Documentation>
 <Parameters>
@@ -63,7 +63,7 @@ All this method expects is that deviceId won't be changed for the app (while Pus
 </Parameter>
 </Parameters>
 </Operation>
-<Operation Name="unregisterDevice" UID="{790FF8A2-2897-4771-A345-6E5861A18340}">
+<Operation Name="UnregisterDevice" UID="{790FF8A2-2897-4771-A345-6E5861A18340}">
 <Parameters>
 <Parameter Name="deviceId" DataType="AnsiString" Flag="In" >
 </Parameter>

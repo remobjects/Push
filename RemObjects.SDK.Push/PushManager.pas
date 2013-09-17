@@ -38,9 +38,11 @@ type
     event DeviceRegistered: DeviceEvent assembly raise;
     event DeviceUnregistered: DeviceEvent assembly raise;
 
-    method PushMessage(aMessage: String; aBadge: nullable Int32 := nil; aSound: String := nil);
+    method PushMessage(aTitle, aMessage: String);
+    method PushCommon(aTitle, aMessage: String; aBadge: nullable Int32; aSound, anImage: String);
     method PushBadge(aBadge: nullable Int32);
     method PushSound(aSound: String);
+    method PushSyncNeeded();
 
   end;
 
@@ -91,10 +93,16 @@ begin
   DeviceRegistered(DeviceManager, new DeviceEventArgs(DeviceToken := aDevice.ID, Mode := DeviceEventArgs.EventMode.EntryUpdated));
 end;
 
-class method PushManager.PushMessage(aMessage: String; aBadge: nullable Int32; aSound: String);
+class method PushManager.PushMessage(aTitle, aMessage: String);
 begin
   for each device in fDeviceManager.Devices do
-    PushConnect.PushMessage(device, aMessage, aBadge, aSound);
+    PushConnect.PushMessage(device, aTitle, aMessage);
+end;
+
+class method PushManager.PushCommon(aTitle: String; aMessage: String; aBadge: nullable Int32; aSound: String; anImage: String);
+begin
+  for each device in fDeviceManager.Devices do
+    PushConnect.PushCommon(device, aTitle, aMessage, aBadge, aSound, anImage);
 end;
 
 class method PushManager.PushBadge(aBadge: nullable Int32);
@@ -107,6 +115,12 @@ class method PushManager.PushSound(aSound: String);
 begin
   for each device in fDeviceManager.Devices do
     PushConnect.PushSound(device, aSound);
+end;
+
+class method PushManager.PushSyncNeeded;
+begin
+  for each device in fDeviceManager.Devices do
+    PushConnect.PushSyncNeeded(device);
 end;
 
 

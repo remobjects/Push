@@ -248,7 +248,7 @@ end;
 method GCMConnect.CheckSetup;
 begin
   if (String.IsNullOrEmpty(self.ApiKey)) then
-    raise new InvalidSetupException(self, 'ApiKey not provided');
+    raise new InvalidSetupException(self, 'ApiKey not set');
 end;
 
 
