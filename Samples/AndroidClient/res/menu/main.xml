@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/options_register"
+        android:title="@string/options_register">
+    </item>
+    <item
+        android:id="@+id/options_unregister"
+        android:title="@string/options_unregister">
+    </item>
+    <item
+        android:id="@+id/options_clear"
+        android:title="@string/options_clear">
+    </item>
+    <item
+        android:id="@+id/options_exit"
+        android:title="@string/options_exit">
+    </item>
+
+</menu>
