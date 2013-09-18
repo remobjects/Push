@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using RemObjects.SDK.Push;
+using RemObjects.SDK.Push.MPNS;
 
 namespace SampleServer
 {
@@ -30,8 +31,8 @@ namespace SampleServer
             DependencyProperty.Register("Badge", typeof(string), typeof(MainWindow), new UIPropertyMetadata("0"));
         public String Badge
         {
-            get { return (string) GetValue(BadgeProperty); }
-            set{ SetValue(BadgeProperty, value);}
+            get { return (string)GetValue(BadgeProperty); }
+            set { SetValue(BadgeProperty, value); }
         }
 
         public MainWindow()
@@ -87,6 +88,15 @@ namespace SampleServer
 
         private void btSend_Click(object sender, RoutedEventArgs e)
         {
+            if (cbSendRawAsToast.IsChecked.GetValueOrDefault(false))
+            {
+                PushManager.PushConnect.MessageCreating += PushConnectOnMessageCreating;
+            }
+            else
+            {
+                PushManager.PushConnect.MessageCreating -= PushConnectOnMessageCreating;
+            }
+
             try
             {
                 PushManager.PushConnect.CheckSetup();
@@ -104,7 +114,7 @@ namespace SampleServer
                     IsSoundSelected = grSound.IsChecked.GetValueOrDefault(false),
                     IsSyncSelected = grSync.IsChecked.GetValueOrDefault(false),
                     IsCommonSelected = grCommon.IsChecked.GetValueOrDefault(false),
-                    Title = String.Empty,
+                    Title = "RO Push Sample",
                     Text = tbText.Text,
                     SoundFile = tbSound.Text,
                     ImageFile = tbImage.Text,
@@ -133,7 +143,67 @@ namespace SampleServer
                     {
                         PushManager.PushCommon(lData.Title, lData.Text, lData.Badge, lData.SoundFile, lData.ImageFile);
                     }
+
                 });
+        }
+
+        private void PushConnectOnMessageCreating(object aSender, MessageCreateEventArgs anArgs)
+        {
+            var lDevice = anArgs.Device as WindowsPhonePushDeviceInfo;
+            if (lDevice != null)
+            {
+                var lMessage = new MPNSToastMessage();
+                lMessage.Text1 = anArgs.MessageData.Title;
+                lMessage.Text2 = anArgs.MessageData.Text;
+                lMessage.NotificationURI = lDevice.NotificationURI.ToString();
+                anArgs.Message = lMessage;
+            }
+        }
+
+        private void btSendToastToWP_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                PushManager.PushConnect.CheckSetup();
+            }
+            catch (InvalidSetupException ex)
+            {
+                tbConnectErrors.Text = String.Format("{0}: {1}", ex.Connect.GetType().Name, ex.Message);
+                return;
+            }
+
+            var lData = new
+                    {
+                        IsTextSelected = grText.IsChecked.GetValueOrDefault(false),
+                        IsBadgeSelected = grBadge.IsChecked.GetValueOrDefault(false),
+                        IsSoundSelected = grSound.IsChecked.GetValueOrDefault(false),
+                        IsSyncSelected = grSync.IsChecked.GetValueOrDefault(false),
+                        IsCommonSelected = grCommon.IsChecked.GetValueOrDefault(false),
+                        Title = String.Empty,
+                        Text = tbText.Text,
+                        SoundFile = tbSound.Text,
+                        ImageFile = tbImage.Text,
+                        Badge = Convert.ToInt32(tbBadge.Text),
+                    };
+
+            Task.Factory.StartNew(() =>
+                    {
+                        if (lData.IsCommonSelected)
+                        {
+                            foreach (var device in PushManager.DeviceManager.Devices)
+                            {
+                                if (device is WindowsPhonePushDeviceInfo)
+                                {
+                                    var lMessage = new MPNSToastMessage();
+                                    lMessage.OSVersion = MPNSDeviceVersion.Seven;
+                                    lMessage.NotificationURI = (device as WindowsPhonePushDeviceInfo).NotificationURI.ToString();
+                                    lMessage.Text1 = lData.Title + " (" + lData.Badge + ")";
+                                    lMessage.Text2 = lData.Text;
+                                    PushManager.PushConnect.MPNSConnect.PushMessage(lMessage);
+                                }
+                            }
+                        }
+                    });
         }
     }
 }
