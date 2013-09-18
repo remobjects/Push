@@ -59,24 +59,20 @@ begin
   if (assigned(aMessage.MessageId)) then
     lWebRequest.Headers.Add("X-MessageID", aMessage.MessageId.ToString());
 
-  var lNotificationType: MPNSMessageType := MPNSMessageType.Raw;
-  if (assigned(aMessage.NotificationType)) then begin
-    lNotificationType := valueOrDefault(aMessage.NotificationType);
-    if (lNotificationType = MPNSMessageType.Toast) then
-      lWebRequest.Headers.Add("X-WindowsPhone-Target", 'toast');
-    if (lNotificationType = MPNSMessageType.Tile) then
-      lWebRequest.Headers.Add("X-WindowsPhone-Target", 'token');
-  end;
+  var lNotificationType :=  valueOrDefault(aMessage.NotificationType);
+  if (lNotificationType = MPNSMessageType.Toast) then
+    lWebRequest.Headers.Add("X-WindowsPhone-Target", 'toast');
+  if (lNotificationType = MPNSMessageType.Tile) then
+    lWebRequest.Headers.Add("X-WindowsPhone-Target", 'token');
 
-  if (assigned(aMessage.SendInterval)) then begin
-    var lValue: Integer := Integer(lNotificationType)*10 + Integer(valueOrDefault(aMessage.SendInterval));
-    lWebRequest.Headers.Add("X-NotificationClass", lValue.ToString());
-  end;
+  var lSendInterval: Integer := Integer(valueOrDefault(aMessage.SendInterval))*10 + Integer(lNotificationType);
+  lWebRequest.Headers.Add("X-NotificationClass", lSendInterval.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
   if (assigned(self.WebServiceCertificate)) then
     lWebRequest.ClientCertificates.Add(self.WebServiceCertificate);
 
   var lBodyText := aMessage.ToXmlString();
-  var lBody := Encoding.Default.GetBytes(lBodyText);
+  var lBody := Encoding.UTF8.GetBytes(lBodyText);
 
   lWebRequest.ContentLength := lBody.Length;
 
@@ -95,6 +91,7 @@ begin
     lResponse:Close();
   end;
   ProcessResponse(aResponse);
+  exit (aResponse.NotificationStatus in [MPNSResponse.NotificationStatus.Suppressed, MPNSResponse.NotificationStatus.Received]);
 end;
 
 method MPNSConnect.ParseCloudResponse(aWebResponse: HttpWebResponse; aMessage: MPNSMessage; out aResponse: MPNSResponse);

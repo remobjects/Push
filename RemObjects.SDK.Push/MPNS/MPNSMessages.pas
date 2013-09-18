@@ -96,7 +96,7 @@ begin
                                         new XText(XmlEscape(item.Value:ToString)),
                                         new XAttribute("key", XmlEscape(item.Key))));
 
-  exit (lDoc.ToString());
+  exit ('<?xml version="1.0" encoding="utf-8"?>' + Environment.NewLine + lDoc.ToString());
 end;
 
 method MPNSToastMessage.ToXmlString: String;
@@ -139,7 +139,7 @@ begin
   end;
 
   lPayload.Add(lToast);
-  exit lPayload.ToString();
+  exit ('<?xml version="1.0" encoding="utf-8"?>' + Environment.NewLine + lPayload.ToString);
 end;
 
 constructor MPNSToastMessage;
