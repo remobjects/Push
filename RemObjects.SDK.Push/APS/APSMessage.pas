@@ -5,21 +5,30 @@ interface
 uses
   System,
   System.Collections.Generic,
+  System.IO,
   System.Linq,
   System.Text,
   RemObjects.SDK;
 
 type
   APSMessage = public class
+  private
+    class fNextIdentifier: Int32 := 0;
+    class fNextIdentifierLock: Object := new Object();
+    class method NextIdentifier(): Int32;    
+    class var UnixEpochUtc: DateTime := new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
   public
-    property Identifier: Integer;
+    class var DoNotStoreDate: DateTime  := DateTime.MinValue; readonly;
+    property Identifier: Int32 read private write;
     property DeviceToken: String;
     property Expiration: DateTime;
 
     property Payload: Payload;
+    property HighPriority: Boolean := true;
 
-    constructor; empty;
-    constructor(aToken: String; aPayload: Payload := nil); empty;
+    constructor;
+    constructor(aToken: String; aPayload: Payload := nil);
+    method ToV2Binary(): array of Byte;
 
   end;
 
@@ -54,6 +63,90 @@ type
   end;
 
 implementation
+
+constructor APSMessage;
+begin
+  self.DeviceToken := String.Empty;
+  self.Payload := new Payload();  
+  self.Identifier := NextIdentifier();
+end;
+
+constructor APSMessage(aToken: String; aPayload: Payload);
+begin
+  // TODO check token
+  self.DeviceToken := aToken;
+  self.Payload := aPayload;  
+  self.Identifier := NextIdentifier();
+end;
+
+class method APSMessage.NextIdentifier(): Int32;
+begin
+  locking (fNextIdentifierLock) do begin
+    if (NextIdentifier > Int32.MaxValue - 50) then
+      inc(fNextIdentifier)
+    else
+      fNextIdentifier := 1;
+    exit (fNextIdentifier);
+  end;
+end;
+
+method APSMessage.ToV2Binary(): array of Byte;
+  method EnsureBigEndian(aBytes: array of Byte): array of Byte;
+  begin
+    if (BitConverter.IsLittleEndian) then
+      &Array.Reverse(aBytes);
+    exit (aBytes);
+  end;
+begin
+  // notification (v2 format)
+  //   2 - 1B
+  //   frame length - 4B
+  //   frame -var
+  //     1 - 1B, 32 - 2B, token - 32B
+  //     2 - 1B, payload.length - 2B, payload - var
+  //     3 - 1B, 4 - 2B, identifier - 4B
+  //     4 - 1B, 4 - 2B, expiry date - 4B
+  //     5 - 1B, 1 - 2B, priority(10 or 5) - 1B
+  var lFrameLengthPos: Int32;
+  using m := new MemoryStream() do begin
+    using wr := new BinaryWriter(m) do begin
+      wr.Write(Byte(2));
+      lFrameLengthPos := m.Position;
+      wr.Write(Int32(0)); // stub
+
+      wr.Write(Byte(1));
+      wr.Write([0, 32]);
+      wr.Write(APSConnect.StringToByteArray(self.DeviceToken));
+
+      wr.Write(Byte(2));
+      var lPayload := self.Payload.ToJsonString();
+      var lPayloadBuf := Encoding.UTF8.GetBytes(lPayload);
+      wr.Write(EnsureBigEndian(BitConverter.GetBytes(Int16(lPayloadBuf.Length))));
+      wr.Write(lPayloadBuf);
+
+      wr.Write(Byte(3));
+      wr.Write([0, 4]);
+      wr.Write(EnsureBigEndian(BitConverter.GetBytes(Int32(self.Identifier))));
+
+      wr.Write(Byte(4));
+      wr.Write([0, 4]);
+      var lExpiryTimeStamp: Int32 := 0; // do-not-store mode
+      if (self.Expiration <> DoNotStoreDate) then begin
+        var lTimeUtc := iif(assigned(self.Expiration), Expiration, DateTime.Now.AddYears(1)).ToUniversalTime();
+        lExpiryTimeStamp := Int32((lTimeUtc - UnixEpochUtc).TotalMilliseconds);
+      end;
+      wr.Write(EnsureBigEndian(BitConverter.GetBytes(lExpiryTimeStamp)));
+
+      wr.Write(Byte(5));
+      wr.Write([0, 1]);
+      wr.Write(Byte(iif(self.HighPriority, 10, 5)));
+      wr.Flush();
+    end;
+
+    exit (m.ToArray());
+  end;
+end;
+
 
 constructor APSMessage.Payload;
 begin
