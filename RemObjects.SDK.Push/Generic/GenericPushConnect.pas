@@ -67,7 +67,7 @@ type
 
     
     method PushMessage(aDevice: PushDeviceInfo; aTitle, aText: String);
-    method PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String);
+    method PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, aImage: String; aSyncNeeded: Boolean := false);
     method PushBadge(aDevice: PushDeviceInfo; aBadge: nullable Int32);
     method PushSound(aDevice: PushDeviceInfo; aSound: String);
     method PushSyncNeeded(aDevice:PushDeviceInfo);
@@ -87,7 +87,7 @@ type
 
 implementation
 
-method GenericPushConnect.PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String);
+method GenericPushConnect.PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, aImage: String; aSyncNeeded: Boolean := false);
 begin
   self.Push(aDevice, ()-> begin
     
@@ -96,7 +96,7 @@ begin
     var lCbCreated := self.MessageCreated;
     var lMessageData: GenericMessageData;
     if (lCbSend <> nil) or (lCbCreated <> nil) or (lCbCreating <> nil) then begin
-      lMessageData := new GenericMessageData(Text := aText, Title := aTitle, Badge := aBadge, Sound := aSound, Image := anImage, SyncNeeded := false);
+      lMessageData := new GenericMessageData(Text := aText, Title := aTitle, Badge := aBadge, Sound := aSound, Image := anImage, SyncNeeded := aSyncNeeded);
     end;
 
     {$REGION  protected method OnMessageSend() begin }
@@ -112,7 +112,7 @@ begin
     case aDevice type of
 
       ApplePushDeviceInfo: begin
-        self.APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aText, aBadge, aSound, 1);
+        self.APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aText, aBadge, aSound, if aSyncNeeded then 1 else nil);
       end;
 
       GooglePushDeviceInfo: begin
