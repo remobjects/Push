@@ -23,7 +23,7 @@ type
   protected
   public
     property &Type: String read "GCM";
-    method CheckSetup;
+    method CheckSetup; virtual;
     property ApiKey: String;
     method PushMessage(aMessage: GCMMessage): GCMResponse;
     method TryPushMessage(aMessage: GCMMessage; out aResponse: GCMResponse): Boolean;

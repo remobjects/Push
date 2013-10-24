@@ -4,6 +4,7 @@ interface
 
 uses
   System.IO,
+  System.Collections.*,
   System.Net,
   System.Net.Security,
   System.Runtime.Remoting.Messaging,
@@ -36,7 +37,7 @@ type
     method Dispose;
 
     property &Type: String read "APS";
-    method CheckSetup;
+    method CheckSetup; virtual;
     // Filename for Certificate .p12
     property MacCertificateFile: String write set_MacCertificateFile;
     property iOSCertificateFile: String write set_iOSCertificateFile;
@@ -137,7 +138,9 @@ begin
 
       using m := new MemoryStream() do begin
         using w := new BinaryWriter(m) do begin
-          w.Write([0,0,32]);
+          // v0 simple notification format 
+          // (https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/LegacyFormat.html)
+          w.Write([0, 0, 32]);
           w.Write(aDevice.Token);
           var data := Encoding.UTF8.GetBytes(Json);
           w.Write([Byte(data.Length and $ff00 div $100), Byte(data.Length and $ff)]);
@@ -328,9 +331,15 @@ end;
 
 method APSConnect.CheckSetup;
 begin
-  // TODO: implement setup check for this connect
-  // if (some check = false) then
-  // throw new InvalidSetupException(self, 'error message', inner exception or nil);
+  // TODO: extend setup check for this connect
+  var lErrors := new StringBuilder();
+
+  if (self.ApsHost not in ['gateway.push.apple.com', 'gateway.sandbox.push.apple.com']) then
+    lErrors.AppendFormat('AppHost should be either "gateway.push.apple.com" or "gateway.sandbox.push.apple.com"\n');
+  if (self.ApsFeedbackHost not in ['feedback.push.apple.com', 'feedback.sandbox.push.apple.com']) then
+    lErrors.AppendFormat('AppFeedbackHost should be either "feedback.push.apple.com" or "feedback.sandbox.push.apple.com"\n');
+  if (lErrors.Length > 0) then
+     raise new InvalidSetupException(self, lErrors.ToString(), nil);
 end;
 
 end.

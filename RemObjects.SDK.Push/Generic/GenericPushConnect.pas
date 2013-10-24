@@ -52,7 +52,7 @@ type
     property APSConnect: APSConnect := new APSConnect; readonly;
     property GCMConnect: GCMConnect := new GCMConnect; readonly;
     property MPNSConnect: MPNSConnect := new MPNSConnect; readonly;
-    method CheckSetup;
+    method CheckSetup; virtual;
 
     // the problem with generic connect is that in Android the reaction on message is defined clientside (toast, notification bar, widget, etc)
     // while on Windows Phone and iOs server decides what it will be (toast, alert, tile, badge, etc).
@@ -67,10 +67,11 @@ type
 
     
     method PushMessage(aDevice: PushDeviceInfo; aTitle, aText: String);
-    method PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, aImage: String; aSyncNeeded: Boolean := false);
+    method PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String; aSyncNeeded: Boolean := false);
     method PushBadge(aDevice: PushDeviceInfo; aBadge: nullable Int32);
     method PushSound(aDevice: PushDeviceInfo; aSound: String);
     method PushSyncNeeded(aDevice:PushDeviceInfo);
+
     event PushSent: MessageSentHandler add addOnPushSent remove removeOnPushSent;
     event PushFailed: MessageFailedHandler add addOnPushFailed remove removeOnPushFailed;
     event DeviceExpired: DeviceExpiredHandler add addOnDeviceExpired remove removeOnDeviceExpired;
@@ -87,7 +88,7 @@ type
 
 implementation
 
-method GenericPushConnect.PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, aImage: String; aSyncNeeded: Boolean := false);
+method GenericPushConnect.PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String; aSyncNeeded: Boolean := false);
 begin
   self.Push(aDevice, ()-> begin
     

@@ -33,6 +33,7 @@ type
     // Toggles whether Users need to Log in before registering devices
     property RequireSession: Boolean;
 
+    // TODO do we wanna it here?
     method Save;
 
     event DeviceRegistered: DeviceEvent assembly raise;
