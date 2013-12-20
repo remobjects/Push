@@ -34,10 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RemObjects.InternetPack, Version=7.0.71.1092, Culture=neutral, PublicKeyToken=3df3cad1b7aa5098, processorArchitecture=MSIL" />
-    <Reference Include="RemObjects.SDK, Version=7.0.71.1092, Culture=neutral, PublicKeyToken=3df3cad1b7aa5098, processorArchitecture=MSIL" />
-    <Reference Include="RemObjects.SDK.Server, Version=7.0.71.1092, Culture=neutral, PublicKeyToken=3df3cad1b7aa5098, processorArchitecture=MSIL" />
-    <Reference Include="RemObjects.SDK.ZLib, Version=7.0.71.1092, Culture=neutral, PublicKeyToken=3df3cad1b7aa5098, processorArchitecture=MSIL" />
+    <Reference Include="RemObjects.InternetPack" />
+    <Reference Include="RemObjects.SDK" />
+    <Reference Include="RemObjects.SDK.Server" />
+    <Reference Include="RemObjects.SDK.ZLib" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />

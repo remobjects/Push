@@ -50,11 +50,11 @@
   <ItemGroup>
     <Reference Include="Microsoft.Phone" />
     <Reference Include="Microsoft.Phone.Interop" />
-    <Reference Include="RemObjects.SDK.WindowsPhone">
-      <HintPath>C:\Program Files (x86)\RemObjects Software\RemObjects SDK for .NET\Bin\WindowsPhone\RemObjects.SDK.WindowsPhone.dll</HintPath>
+    <Reference Include="RemObjects.SDK">
+      <HintPath>C:\Program Files (x86)\RemObjects Software\RemObjects SDK for .NET\Bin\WindowsPhone\RemObjects.SDK.dll</HintPath>
     </Reference>
-    <Reference Include="RemObjects.SDK.ZLib.WindowsPhone">
-      <HintPath>C:\Program Files (x86)\RemObjects Software\RemObjects SDK for .NET\Bin\WindowsPhone\RemObjects.SDK.ZLib.WindowsPhone.dll</HintPath>
+    <Reference Include="RemObjects.SDK.ZLib">
+      <HintPath>C:\Program Files (x86)\RemObjects Software\RemObjects SDK for .NET\Bin\WindowsPhone\RemObjects.SDK.ZLib.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows" />
     <Reference Include="system" />
