@@ -31,8 +31,6 @@ type
   private 
     method InitializeComponent;
     var components: System.ComponentModel.Container := nil;
-    
-    method Log(aMessage: String);
   protected 
     method Dispose(aDisposing: System.Boolean); override;
   public 
@@ -64,11 +62,6 @@ begin
     end;
   end;
   inherited Dispose(aDisposing);
-end;
-
-method GooglePushProviderService.Log(aMessage: String);
-begin
-  File.AppendAllText(Path.ChangeExtension(typeOf(self).Assembly.Location, '.log'), DateTime.Now.ToString('yyyy-MM-dd HH:mm:ss')+' '+aMessage+#13#10);
 end;
 
 method GooglePushProviderService.registerDevice(registrationId: System.String; additionalInfo: System.String);

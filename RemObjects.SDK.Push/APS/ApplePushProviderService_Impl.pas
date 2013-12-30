@@ -16,7 +16,6 @@ type
   [RemObjects.SDK.Server.Service(Name := 'ApplePushProviderService', InvokerClass := typeOf(ApplePushProviderService_Invoker), ActivatorClass := typeOf(ApplePushProviderService_Activator))]
   ApplePushProviderService = public class(RemObjects.SDK.Server.Service, IApplePushProviderService)
   private 
-    method Log(aMessage: String);
     method InitializeComponent;
     method BinaryToString(aBinary: Binary): String;
     var components: System.ComponentModel.Container := nil;
@@ -35,11 +34,6 @@ begin
   inherited constructor();
   self.InitializeComponent();
   self.RequireSession := PushManager.RequireSession;
-end;
-
-method ApplePushProviderService.Log(aMessage: String);
-begin
-  File.AppendAllText(Path.ChangeExtension(typeOf(self).Assembly.Location, '.log'), DateTime.Now.ToString('yyyy-MM-dd HH:mm:ss')+' '+aMessage+#13#10);
 end;
 
 method ApplePushProviderService.InitializeComponent;

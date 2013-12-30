@@ -32,7 +32,6 @@ type
     method InitializeComponent;
     var components: System.ComponentModel.Container := nil;
 
-    method Log(aMessage: String);
   protected 
     method Dispose(aDisposing: System.Boolean); override;
   public 
@@ -64,11 +63,6 @@ begin
     end;
   end;
   inherited Dispose(aDisposing);
-end;
-
-method WindowsPhonePushProviderService.Log(aMessage: String);
-begin
-  File.AppendAllText(Path.ChangeExtension(typeOf(self).Assembly.Location, '.log'), DateTime.Now.ToString('yyyy-MM-dd HH:mm:ss')+' '+aMessage+#13#10);
 end;
 
 method WindowsPhonePushProviderService.RegisterDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String);

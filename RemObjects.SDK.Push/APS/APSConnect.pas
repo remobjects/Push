@@ -28,7 +28,6 @@ type
     fMacCertificate, fiOSCertificate, fWebCertificate: X509Certificate2;
     method CreateStream(aCertificate: X509Certificate2);
     method FindCertificate(aName: String): X509Certificate2;
-    method Log(aMessage: String);
     method set_MacCertificateFile(value: String);
     method set_iOSCertificateFile(value: String);
     method set_WebCertificateFile(value: String);
@@ -263,11 +262,6 @@ begin
 
   end;
   lTcpClient.Close();
-end;
-
-method APSConnect.Log(aMessage: String);
-begin
-  File.AppendAllText(Path.ChangeExtension(typeOf(self).Assembly.Location, '.log'), DateTime.Now.ToString('yyyy-MM-dd HH:mm:ss')+' '+aMessage+#13#10);
 end;
 
 method APSConnect.set_MacCertificateFile(value: String);
