@@ -19,7 +19,7 @@ type
     event PushFailed : MessageFailedHandler protected raise;
     event DeviceExpired : DeviceExpiredHandler protected raise;
     property &Type: String read "MPNS";
-    method CheckSetup; empty; // no setup needed for this connect
+    method CheckSetup; empty; virtual; // no setup needed for this connect
 
     property WebServiceCertificate: System.Security.Cryptography.X509Certificates.X509Certificate2;
 
