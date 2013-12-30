@@ -96,7 +96,7 @@ begin
     var lCbCreated := self.MessageCreated;
     var lMessageData: GenericMessageData;
     if (lCbSend <> nil) or (lCbCreated <> nil) or (lCbCreating <> nil) then begin
-      lMessageData := new GenericMessageData(Text := aText, Title := aTitle, Badge := aBadge, Sound := aSound, Image := anImage, SyncNeeded := aSyncNeeded);
+      lMessageData := new GenericMessageData(Text := aText, Title := aTitle, Badge := aBadge, Sound := aSound, Image := aImage, SyncNeeded := aSyncNeeded);
     end;
 
     {$REGION  protected method OnMessageSend() begin }
@@ -138,7 +138,7 @@ begin
                               .WithText(aText)
                               .WithTitle(aTitle)
                               .WithSound(aSound)
-                              .WithImage(anImage)
+                              .WithImage(aImage)
                               .WithBadge(valueOrDefault(aBadge, 0));
         end;
 
@@ -177,7 +177,7 @@ begin
           if (not String.IsNullOrEmpty(aSound)) then
             lDataMessage.Data["sound"]:= aSound;
           if (not String.IsNullOrEmpty(aSound)) then
-            lDataMessage.Data["image"] := anImage;
+            lDataMessage.Data["image"] := aImage;
 
           lMessage := lDataMessage;
         end;
