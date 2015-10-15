@@ -67,7 +67,7 @@ type
 
     
     method PushMessage(aDevice: PushDeviceInfo; aTitle, aText: String);
-    method PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String; aSyncNeeded: Boolean := false);
+    method PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, aImage: String; aSyncNeeded: Boolean := false);
     method PushBadge(aDevice: PushDeviceInfo; aBadge: nullable Int32);
     method PushSound(aDevice: PushDeviceInfo; aSound: String);
     method PushSyncNeeded(aDevice:PushDeviceInfo);
@@ -75,11 +75,11 @@ type
     event PushSent: MessageSentHandler add addOnPushSent remove removeOnPushSent;
     event PushFailed: MessageFailedHandler add addOnPushFailed remove removeOnPushFailed;
     event DeviceExpired: DeviceExpiredHandler add addOnDeviceExpired remove removeOnDeviceExpired;
-    event ConnectException: PushExceptionHandler raise;
+    event ConnectException: PushExceptionHandler;// raise;
 
-    event MessageSend: MessageSendHandler raise;
-    event MessageCreating: MessageCreateHandler raise;
-    event MessageCreated: MessageCreateHandler raise;
+    event MessageSend: MessageSendHandler;//raise;
+    event MessageCreating: MessageCreateHandler;// raise;
+    event MessageCreated: MessageCreateHandler;// raise;
     // TODO maybe later
     //method PushData(aDevice: PushDeviceInfo; aData: Dictionary<String, Object>);
 
@@ -88,13 +88,13 @@ type
 
 implementation
 
-method GenericPushConnect.PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, anImage: String; aSyncNeeded: Boolean := false);
+method GenericPushConnect.PushCommon(aDevice: PushDeviceInfo; aTitle, aText: String; aBadge: nullable Int32; aSound, aImage: String; aSyncNeeded: Boolean := false);
 begin
-  self.Push(aDevice, ()-> begin
+  self.Push(aDevice, -> begin
     
-    var lCbSend := self.MessageSend;
-    var lCbCreating := self.MessageCreating;
-    var lCbCreated := self.MessageCreated;
+    var lCbSend := MessageSend;
+    var lCbCreating := MessageCreating;
+    var lCbCreated := MessageCreated;
     var lMessageData: GenericMessageData;
     if (lCbSend <> nil) or (lCbCreated <> nil) or (lCbCreating <> nil) then begin
       lMessageData := new GenericMessageData(Text := aText, Title := aTitle, Badge := aBadge, Sound := aSound, Image := aImage, SyncNeeded := aSyncNeeded);
@@ -103,7 +103,7 @@ begin
     {$REGION  protected method OnMessageSend() begin }
     if (assigned(lCbSend)) then begin
       var lSendArgs := new MessageSendEventArgs(aDevice, lMessageData);
-      lCbSend(self, lSendArgs);
+      MessageSend(self, lSendArgs);
       if (lSendArgs.Handled) then
         exit; // message sent or suspended by the user event handler
     end;
@@ -113,7 +113,7 @@ begin
     case aDevice type of
 
       ApplePushDeviceInfo: begin
-        self.APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aText, aBadge, aSound, if aSyncNeeded then 1 else nil);
+        self.APSConnect.PushCombinedNotification((aDevice as ApplePushDeviceInfo), aTitle, aText, aBadge, aSound, if aSyncNeeded then 1 else nil);
       end;
 
       GooglePushDeviceInfo: begin
@@ -121,7 +121,7 @@ begin
         {$REGION protected method OnMessageCreating(args) begin}
         if (assigned(lCbCreating)) then begin
           lArgs := new MessageCreateEventArgs(aDevice, lMessageData);
-          lCbCreating(self, lArgs);
+          MessageCreating(self, lArgs);
           if (assigned(lArgs.Message)) then
             if (lArgs.Message is GCMMessage) then
               lMessage := GCMMessage(lArgs.Message)
@@ -148,7 +148,7 @@ begin
           if (lArgs = nil) then
             lArgs := new MessageCreateEventArgs(aDevice, lMessageData);
           lArgs.Message := lMessage;
-          lCbCreated(self, lArgs);  
+          MessageCreated(self, lArgs);  
         end;
         {$ENDREGION }
         self.sendGcmMessage(lMessage);
@@ -159,7 +159,7 @@ begin
         {$REGION protected method OnMessageCreating(args) begin}
         if (assigned(lCbCreating)) then begin
           lArgs := new MessageCreateEventArgs(aDevice, lMessageData);
-          lCbCreating(self, lArgs);
+          MessageCreating(self, lArgs);
           if (assigned(lArgs.Message)) then
             if (lArgs.Message is MPNSMessage) then
               lMessage := MPNSMessage(lArgs.Message)
@@ -187,7 +187,7 @@ begin
           if (lArgs = nil) then
             lArgs := new MessageCreateEventArgs(aDevice, lMessageData);
           lArgs.Message := lMessage;
-          lCbCreated(self, lArgs);  
+          MessageCreated(self, lArgs);  
         end;
         {$ENDREGION }
         self.sendMpnsMessage(lMessage);

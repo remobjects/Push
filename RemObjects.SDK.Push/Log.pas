@@ -6,7 +6,7 @@ uses
   System.IO;
 
 type
-  Log = public class
+  PushLog = public class
   private
     class var
       fCount: Int32 := 0;
@@ -17,17 +17,17 @@ type
     class property Enabled: Boolean;
   public
     class method Log(aMessage: String); locked;
-    class operator Explicit(aString: String): Log;
+    class operator Explicit(aString: String): PushLog;
   end;
   
 implementation
 
-class constructor Log;
+class constructor PushLog;
 begin
   fFilename := Path.ChangeExtension(typeOf(self).Assembly.Location, '.'+System.Environment.MachineName+'.log')
 end;
 
-class method Log.Log(aMessage: String);
+class method PushLog.Log(aMessage: String);
 begin
   if not Enabled then exit;
 
@@ -43,7 +43,7 @@ begin
   Console.WriteLine(aMessage);
 end;
 
-class operator Log.Explicit(aString: String): Log;
+class operator PushLog.Explicit(aString: String): PushLog;
 begin
   Log(aString);
 end;

@@ -59,16 +59,16 @@ method ApplePushProviderService.registerDevice(deviceToken: RemObjects.SDK.Types
 begin
   try
     var lStringToken := BinaryToString(deviceToken);
-    Log('Push registration for '+ lStringToken);
+    PushLog('Push registration for '+ lStringToken);
     var lDevice: PushDeviceInfo;
     if PushManager.DeviceManager.TryGetDevice(lStringToken, out lDevice) then begin
-      Log('Push registration updated for '+lStringToken);
+      PushLog('Push registration updated for '+lStringToken);
 
       PushManager.UpdateDevice(lDevice, additionalInfo);
       PushManager.Save;
     end
     else begin
-      Log('Push registration new for '+ lStringToken);
+      PushLog('Push registration new for '+ lStringToken);
       lDevice := new ApplePushDeviceInfo(Token := deviceToken.ToArray(), 
                                        SubType := 'iOS',
                                        UserReference := iif(HasSession, Session['UserID']:ToString, nil),
@@ -81,8 +81,8 @@ begin
     end;
   except
     on E:Exception do begin
-      Log(E.Message);
-      Log(E.StackTrace);
+      PushLog(E.Message);
+      PushLog(E.StackTrace);
     end;
   end;
 end;

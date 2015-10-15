@@ -51,7 +51,7 @@ type
     method PushBadgeNotification(aDevice: ApplePushDeviceInfo; aBadge: Int32);
     method PushAudioNotification(aDevice: ApplePushDeviceInfo; aSound: String);
     method PushSyncNeededNotification(aDevice: ApplePushDeviceInfo; aContentAvailable: Int32);
-    method PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
+    method PushCombinedNotification(aDevice: ApplePushDeviceInfo; aTitle: String; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
 
     method GetFeedback(aCertificate: X509Certificate2);
 
@@ -130,9 +130,9 @@ begin
                end;
   if not assigned(lCert) then raise new Exception('No APS certificate configured for device type "'+aDevice.SubType+'"');
 
-  Log(Json);
+  PushLog(Json);
   locking self do begin
-    Log('3b');
+    PushLog('3b');
     for i: Int32 := 0 to 3 do try
 
       using m := new MemoryStream() do begin
@@ -147,20 +147,20 @@ begin
           w.Flush;
       
           //todo: this is temp; we need to cache the connection but also properly recover from loss
-          Log('4a '+i);
+          PushLog('4a '+i);
           CreateStream(lCert);
-          Log('4b');
+          PushLog('4b');
           try
             fSslStream.Write(m.ToArray);
-            Log('4c');
+            PushLog('4c');
             fSslStream.Flush;
-            Log('4d');
+            PushLog('4d');
           finally
-            Log('4e');
+            PushLog('4e');
             fSslStream.Dispose();
-            Log('4f');
+            PushLog('4f');
             fTcpClient.Close();
-            Log('4g');
+            PushLog('4g');
             fSslStream := nil;
             fTcpClient := nil;
           end;
@@ -171,11 +171,11 @@ begin
 
     except
       on E: IOException do begin
-         Log('Failed on Push, try '+i.ToString+': '+E.Message);
+         PushLog('Failed on Push, try '+i.ToString+': '+E.Message);
       end;
     end;
 
-    Log('3c');
+    PushLog('3c');
   end;
 end;
 
@@ -204,9 +204,12 @@ begin
   PushRawNotification(aDevice, lJson);
 end;
 
-method APSConnect.PushCombinedNotification(aDevice: ApplePushDeviceInfo; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
+method APSConnect.PushCombinedNotification(aDevice: ApplePushDeviceInfo; aTitle: String; aMessage: String; aBadge: nullable Int32; aSound: String; aContentAvailable: nullable Int32 := nil);
 begin
   var lData := new StringBuilder();
+  (*if assigned(aTitle) then begin
+    lData.AppendFormat('"title":{0}', JsonTokenizer.EncodeString(aMessage));
+  end;*)
   if assigned(aMessage) then begin
     lData.AppendFormat('"alert":{0}', JsonTokenizer.EncodeString(aMessage));
   end;
@@ -309,17 +312,17 @@ begin
   var lCertificatePath := Path.ChangeExtension(aFilename, 'iOS.p12');
   if File.Exists(lCertificatePath) then begin
    iOSCertificateFile := lCertificatePath;
-    Log('Loaded Apple iOS Push Certificate from '+lCertificatePath);
+    PushLog('Loaded Apple iOS Push Certificate from '+lCertificatePath);
   end;
   lCertificatePath := Path.ChangeExtension(aFilename, 'Mac.p12');
   if File.Exists(lCertificatePath) then begin
    MacCertificateFile := lCertificatePath;
-    Log('Loaded Apple Mac Push Certificate from '+lCertificatePath);
+    PushLog('Loaded Apple Mac Push Certificate from '+lCertificatePath);
   end;
   lCertificatePath := Path.ChangeExtension(aFilename, 'Web.p12');
   if File.Exists(lCertificatePath) then begin
     WebCertificateFile := lCertificatePath;
-    Log('Loaded Apple Web Push Certificate from '+lCertificatePath);
+    PushLog('Loaded Apple Web Push Certificate from '+lCertificatePath);
   end;
 end;
 

@@ -68,10 +68,10 @@ end;
 method WindowsPhonePushProviderService.RegisterDevice(deviceId: System.String; pushNotificationURI: System.String; osVersion: System.String; additionalInfo: System.String);
 begin
   try
-    Log('Push(MPNS) registration for '+ deviceId);
+    PushLog('Push(MPNS) registration for '+ deviceId);
     var lDevice: PushDeviceInfo;
     if PushManager.DeviceManager.TryGetDevice(deviceId, out lDevice) then begin
-      Log('Push(MPNS) registration updated for '+ deviceId);
+      PushLog('Push(MPNS) registration updated for '+ deviceId);
 
       WindowsPhonePushDeviceInfo(lDevice).NotificationURI := new Uri(pushNotificationURI);
       WindowsPhonePushDeviceInfo(lDevice).OSVersion := osVersion;
@@ -79,7 +79,7 @@ begin
       PushManager.Save;
     end
     else begin
-      Log('Push(MPNS) registration new for '+ deviceId);
+      PushLog('Push(MPNS) registration new for '+ deviceId);
       var p := new WindowsPhonePushDeviceInfo(
                                        DeviceID := deviceId,
                                        NotificationURI := new Uri(pushNotificationURI),
@@ -93,8 +93,8 @@ begin
     end;
   except
     on E:Exception do begin
-      Log(E.Message);
-      Log(E.StackTrace);
+      PushLog(E.Message);
+      PushLog(E.StackTrace);
     end;
   end;
 end;

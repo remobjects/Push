@@ -67,16 +67,16 @@ end;
 method GooglePushProviderService.registerDevice(registrationId: System.String; additionalInfo: System.String);
 begin
   try
-    Log('Push(GCM) registration for '+ registrationId);
+    PushLog('Push(GCM) registration for '+ registrationId);
     var lDevice: PushDeviceInfo;
     if PushManager.DeviceManager.TryGetDevice(registrationId, out lDevice) then begin
-      Log('Push(GCM) registration updated for '+ registrationId);
+      PushLog('Push(GCM) registration updated for '+ registrationId);
 
       PushManager.UpdateDevice(lDevice, additionalInfo); 
       PushManager.Save;
     end
     else begin
-      Log('Push(GCM) registration new for '+ registrationId);
+      PushLog('Push(GCM) registration new for '+ registrationId);
       var p := new GooglePushDeviceInfo(RegistrationID := registrationId,
                                        UserReference := iif(HasSession, Session['UserID']:ToString, nil),
                                        ClientInfo := additionalInfo, 
@@ -87,8 +87,8 @@ begin
     end;
   except
     on E:Exception do begin
-      Log(E.Message);
-      Log(E.StackTrace);
+      PushLog(E.Message);
+      PushLog(E.StackTrace);
     end;
   end;
 end;
