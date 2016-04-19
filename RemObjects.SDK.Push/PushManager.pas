@@ -22,7 +22,7 @@ type
   private
     fDeviceManager: IDeviceManager;
     method Set_DeviceManager(aDeviceManager: IDeviceManager);
-  assembly
+  public
     method AddDevice(aDevice: PushDeviceInfo);
     method RemoveDevice(anId: String): Boolean;
     method UpdateDevice(aDevice: PushDeviceInfo; anAdditionalClientInfo: String);

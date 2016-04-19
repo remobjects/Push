@@ -17,6 +17,7 @@ type
     method AddDevice(anId: String; aDevice: PushDeviceInfo); virtual;
     method RemoveDevice(anId: String): Boolean; virtual;
     method TryGetDevice(anId: String; out aDevice: PushDeviceInfo): Boolean;
+    method HasDevice(anId: String): Boolean;
     method Save; empty; virtual;
     method Load; empty; virtual;
   end;
@@ -26,17 +27,23 @@ implementation
 
 method InMemoryDeviceManager.AddDevice(anId: String; aDevice: PushDeviceInfo);
 begin
+  writeLn("inseriting key '"+anID+"'");
   fDevices.Add(anId, aDevice);
 end;
 
 method InMemoryDeviceManager.RemoveDevice(anId: String): Boolean;
 begin
-  exit (fDevices.Remove(anId));
+  result := fDevices.Remove(anId);
 end;
 
 method InMemoryDeviceManager.TryGetDevice(anId: String; out aDevice: PushDeviceInfo): Boolean;
 begin
-  exit  (fDevices.TryGetValue(anId, out aDevice));
+  result := fDevices.TryGetValue(anId, out aDevice);
+end;
+
+method InMemoryDeviceManager.HasDevice(anId: String): Boolean;
+begin
+  result := fDevices.ContainsKey(anId);
 end;
 
 end.

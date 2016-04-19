@@ -77,9 +77,6 @@
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="mscorlib"/>
-        <Reference Include="RemObjects.InternetPack">
-            <HintPath>C:\Program Files (x86)\RemObjects Software\RemObjects SDK for .NET\Bin\RemObjects.InternetPack.dll</HintPath>
-        </Reference>
         <Reference Include="RemObjects.SDK">
             <Private>True</Private>
             <Package>/Users/mh/Code/RemObjects Data Abstract for Mono - 6.0.46.822/RemObjects.SDK.dll</Package>
@@ -98,6 +95,9 @@
         <Reference Include="System.Windows.Forms"/>
         <Reference Include="System.Xml"/>
         <Reference Include="System.Xml.Linq"/>
+        <Reference Include="RemObjects.InternetPack">
+            <Private>True</Private>
+        </Reference>
         <Reference Include="Mono.Security">
             <HintPath>Mono.Security.dll</HintPath>
             <Private>True</Private>

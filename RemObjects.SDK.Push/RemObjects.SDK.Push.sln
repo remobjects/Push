@@ -1,51 +1,20 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "RemObjects.SDK.Push", "RemObjects.SDK.Push.oxygene", "{6EE56252-1979-48FA-8409-3DCED05426C3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleServer", "..\Samples\SampleServer\SampleServer.csproj", "{07234960-EAE3-4A58-A192-04BA5120581D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{E2007582-0BE6-4A42-8A0F-3D43EA183835}"
+# RemObjects Fire
+Project("{656346D9-4656-40DA-A068-22D5425D4639}") = "RemObjects.SDK.Push", "RemObjects.SDK.Push.elements", "{6EE56252-1979-48FA-8409-3DCED05426C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
 		Debug|AnyCPU = Debug|AnyCPU
-		Debug|Mixed Platforms = Debug|Mixed Platforms
-		Release|Any CPU = Release|Any CPU
 		Release|AnyCPU = Release|AnyCPU
-		Release|Mixed Platforms = Release|Mixed Platforms
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Debug|Any CPU.ActiveCfg = Debug|AnyCPU
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Debug|Any CPU.Build.0 = Debug|AnyCPU
 		{6EE56252-1979-48FA-8409-3DCED05426C3}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
 		{6EE56252-1979-48FA-8409-3DCED05426C3}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Debug|Mixed Platforms.ActiveCfg = Debug|AnyCPU
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Debug|Mixed Platforms.Build.0 = Debug|AnyCPU
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Release|Any CPU.ActiveCfg = Release|AnyCPU
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Release|Any CPU.Build.0 = Release|AnyCPU
 		{6EE56252-1979-48FA-8409-3DCED05426C3}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
 		{6EE56252-1979-48FA-8409-3DCED05426C3}.Release|AnyCPU.Build.0 = Release|AnyCPU
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Release|Mixed Platforms.ActiveCfg = Release|AnyCPU
-		{6EE56252-1979-48FA-8409-3DCED05426C3}.Release|Mixed Platforms.Build.0 = Release|AnyCPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Debug|AnyCPU.Build.0 = Debug|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Release|AnyCPU.ActiveCfg = Release|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Release|AnyCPU.Build.0 = Release|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{07234960-EAE3-4A58-A192-04BA5120581D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{07234960-EAE3-4A58-A192-04BA5120581D} = {E2007582-0BE6-4A42-8A0F-3D43EA183835}
 	EndGlobalSection
 EndGlobal

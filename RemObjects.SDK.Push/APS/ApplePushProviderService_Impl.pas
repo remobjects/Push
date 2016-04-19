@@ -1,4 +1,4 @@
-namespace RemObjects.SDK.Push;
+﻿namespace RemObjects.SDK.Push;
 
 interface
 
@@ -17,11 +17,11 @@ type
   ApplePushProviderService = public class(RemObjects.SDK.Server.Service, IApplePushProviderService)
   private 
     method InitializeComponent;
-    method BinaryToString(aBinary: Binary): String;
     var components: System.ComponentModel.Container := nil;
   protected 
     method Dispose(aDisposing: System.Boolean); override;
   public 
+    class method BinaryToString(aBinary: Binary): String;
     constructor;
     method registerDevice(deviceToken: RemObjects.SDK.Types.Binary; additionalInfo: System.String); locked on typeOf(PushManager);
     method unregisterDevice(deviceToken: RemObjects.SDK.Types.Binary); locked on typeOf(PushManager);
@@ -50,7 +50,7 @@ begin
   inherited Dispose(aDisposing);
 end;
 
-method ApplePushProviderService.BinaryToString(aBinary: Binary):String;
+class method ApplePushProviderService.BinaryToString(aBinary: Binary):String;
 begin
   result := RemObjects.SDK.Push.APS.APSConnect.ByteArrayToString(aBinary.ToArray());
 end;
