@@ -56,7 +56,7 @@ begin
   lWebRequest.Method := 'POST';
   lWebRequest.ContentType := 'text/xml';
 
-  if (assigned(aMessage.MessageId)) then
+  if aMessage.MessageId ≠ Guid.Empty then
     lWebRequest.Headers.Add("X-MessageID", aMessage.MessageId.ToString());
 
   var lNotificationType :=  valueOrDefault(aMessage.NotificationType);

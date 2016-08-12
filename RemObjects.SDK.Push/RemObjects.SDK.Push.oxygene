@@ -162,7 +162,7 @@
             <Properties InternalTargetFrameworkVersion="3.5"/>
         </MonoDevelop>
     </ProjectExtensions>
-    <Import Project="$(MSBuildExtensionsPath)/RemObjects Software/Oxygene/RemObjects.Oxygene.Echoes.targets"/>
+    <Import Project="$(MSBuildExtensionsPath)\RemObjects Software\Elements\RemObjects.Elements.Echoes.targets"/>
     <PropertyGroup>
         <PreBuildEvent/>
     </PropertyGroup>
