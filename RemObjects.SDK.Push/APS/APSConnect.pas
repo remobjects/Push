@@ -223,7 +223,7 @@ begin
   end;
   if assigned(aContentAvailable) then begin
     if (lData.Length > 0) then lData.Append(',');
-    lData.AppendFormat('"content-available":{0}', valueOrDefault(aContentAvailable));
+    lData.AppendFormat('"content-available":{0}', aContentAvailable);
   end;
 
   var lJson := String.Format('{{"aps":{{{0}}}}}', lData.ToString);

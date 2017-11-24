@@ -27,7 +27,7 @@ implementation
 
 method InMemoryDeviceManager.AddDevice(anId: String; aDevice: PushDeviceInfo);
 begin
-  writeLn("inseriting key '"+anID+"'");
+  writeLn("inseriting key '"+anId+"'");
   fDevices.Add(anId, aDevice);
 end;
 
